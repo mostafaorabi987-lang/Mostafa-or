@@ -1,0 +1,3449 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0b5cab">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>بوابة عرابي - فحص المركبات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --bg:#eef2f9; --card:#ffffff; --ink:#0f2744; --ink2:#25415f; --muted:#5b7392;
+  --line:#d8e2f0; --line2:#e8eef7;
+  --brand:#0b5cab; --brand-d:#094a8c; --blue:#1667c9; --blue-d:#0f56ab;
+  --ok:#12854a; --ok-bg:#e6f4ec; --ok-line:#bfe3cf;
+  --bad:#d23b3b; --bad-bg:#fdeaea; --bad-line:#f2c2c2;
+  --gold:#a9791c; --gold-bg:#fffaf0; --gold-line:#e2c586;
+  --thead:#1667c9; --tline:#e8eef7; --wrow:#fdf3dc; --wrow-ink:#8a6413;
+  --shadow:0 2px 10px rgba(16,45,80,.08);
+  --shadow-l:0 10px 34px rgba(16,45,80,.18);
+  --r:14px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+html[data-theme="dark"]{
+  --bg:#080f1c; --card:#101b2e; --ink:#e7eefb; --ink2:#c6d6ee; --muted:#8ba4c8;
+  --line:#1d2f4b; --line2:#16243a;
+  --brand:#0a1424; --brand-d:#070f1c; --blue:#2b7fe0; --blue-d:#1f6bc4;
+  --ok:#2fbe7c; --ok-bg:#102132; --ok-line:#1c4a35;
+  --bad:#ff6f6f; --bad-bg:#2a1420; --bad-line:#5a2429;
+  --gold:#e6b74f; --gold-bg:#241d0b; --gold-line:#6b5418;
+  --thead:#12233c; --tline:#2f7fd0; --wrow:#5a4712; --wrow-ink:#ffd982;
+  --shadow:0 2px 10px rgba(0,0,0,.4);
+  --shadow-l:0 12px 40px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Cairo','Segoe UI',Tahoma,'Noto Naskh Arabic',sans-serif;
+  font-weight:600;overscroll-behavior:none;
+  transition:background .25s,color .25s;
+}
+button,input,select{font-family:inherit;font-weight:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.hide{display:none!important}
+
+/* ============ LOGIN ============ */
+#login{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:18px;padding-top:calc(18px + var(--safe-t))}
+.lg-card{width:100%;max-width:420px;background:var(--card);border-radius:22px;overflow:hidden;box-shadow:var(--shadow-l)}
+.lg-head{background:linear-gradient(120deg,#0d6b3f 0%,#0b5f57 45%,#0b5cab 100%);padding:26px 18px 22px;text-align:center;color:#fff}
+.lg-mark{width:66px;height:66px;margin:0 auto 10px;border-radius:18px;background:radial-gradient(circle at 35% 25%,#1a5c3d,#062018);border:2px solid rgba(212,175,96,.75);display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(212,175,96,.25) inset}
+.lg-head h1{margin:0;font-size:30px;font-weight:900;letter-spacing:.5px}
+.lg-head p{margin:4px 0 0;font-size:14px;opacity:.92;font-weight:600}
+.lg-body{padding:22px 20px 24px}
+.lg-body h2{margin:0 0 18px;text-align:center;font-size:26px;font-weight:900}
+.fl{display:block;font-size:13px;color:var(--blue);margin:0 4px 6px;font-weight:700}
+.fi{width:100%;padding:13px 14px;border:1.6px solid var(--line);border-radius:12px;background:var(--card);font-size:16px;text-align:center;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--blue)}
+.field{margin-bottom:14px}
+.btn-main{width:100%;padding:14px;border-radius:12px;background:var(--blue);color:#fff;font-size:17px;font-weight:800;box-shadow:0 4px 12px rgba(22,103,201,.28)}
+.btn-main:active{transform:translateY(1px)}
+.lg-note{margin:14px 2px 0;font-size:12px;color:var(--muted);text-align:center;line-height:1.7;font-weight:600}
+.lg-err{color:var(--bad);font-size:13px;text-align:center;margin-top:10px;min-height:18px}
+
+/* ============ SHELL ============ */
+#app{display:flex;flex-direction:column;height:100dvh}
+header{
+  background:var(--brand);color:#fff;flex:0 0 auto;
+  padding:calc(10px + var(--safe-t)) 12px 10px;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:20
+}
+header h1{flex:1;margin:0;text-align:center;font-size:21px;font-weight:900;letter-spacing:.3px}
+.hbtn{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff}
+.hbtn:active{background:rgba(255,255,255,.14)}
+html[data-theme="dark"] #btnTheme{background:var(--blue);color:#fff}
+html[data-theme="dark"] #btnOut{color:#ff4d6a}
+main{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 16px}
+nav{
+  flex:0 0 auto;background:var(--card);border-top:1px solid var(--line);
+  display:flex;padding:6px 6px calc(6px + var(--safe-b));
+}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;border-radius:14px;color:var(--muted);font-size:12.5px;font-weight:700;transition:.15s}
+.nb.on{color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent)}
+.nb svg{width:23px;height:23px}
+.nb{position:relative}
+.nb-badge{position:absolute;top:2px;inset-inline-end:calc(50% - 27px);min-width:19px;height:19px;padding:0 5px;
+  border-radius:10px;background:var(--blue);color:#fff;font-size:11px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.nb-badge.w{background:var(--gold)}
+
+/* ============ SCAN ============ */
+.mic-bar{
+  width:100%;background:var(--card);border:2px solid var(--blue);border-radius:16px;
+  padding:12px 12px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);
+  transition:.2s;
+}
+.mic-bar.live{background:var(--blue);border-color:var(--blue);color:#fff}
+.mic-ic{width:46px;height:46px;border-radius:13px;background:color-mix(in srgb,var(--blue) 14%,transparent);display:flex;align-items:center;justify-content:center;color:var(--blue);flex:0 0 auto}
+.mic-bar.live .mic-ic{background:rgba(255,255,255,.18);color:#fff}
+.mic-bar.live .mic-ic{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.45)}50%{box-shadow:0 0 0 9px rgba(255,255,255,0)}}
+.mic-txt{flex:1;text-align:center;line-height:1.35}
+.mic-txt b{display:block;font-size:18px;font-weight:900}
+.mic-txt span{font-size:12.5px;opacity:.78;font-weight:600}
+.mic-play{width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--blue);flex:0 0 auto}
+.mic-bar.live .mic-play{color:#fff}
+.mic-bar.alarm{background:var(--gold-bg);border-color:var(--gold);color:var(--gold)}
+.mic-bar.alarm .mic-ic{background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold);animation:none}
+.mic-bar.alarm .mic-play{color:var(--gold)}
+.mic-bar.alarm .mic-txt span{opacity:.9}
+
+.chip-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px 0 8px}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:22px;
+  background:var(--card);border:1.6px solid var(--line);font-size:14px;font-weight:800;
+  color:var(--ink2);box-shadow:var(--shadow)
+}
+.chip.on{border-color:var(--gold);color:var(--gold);background:var(--gold-bg)}
+.chip.num-on{border-color:var(--blue);color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent)}
+.chip.gps-ok{border-color:var(--ok);color:var(--ok);background:var(--ok-bg)}
+.chip.gps-wait{border-color:var(--blue);color:var(--blue)}
+.chip.gps-err{border-color:var(--bad);color:var(--bad);background:var(--bad-bg)}
+.chip.gps-off{opacity:.7}
+.chip svg{width:17px;height:17px}
+
+.vol{
+  display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+  border-radius:22px;padding:7px 14px;box-shadow:var(--shadow);margin-bottom:10px
+}
+.vol .lb{font-size:13.5px;font-weight:800;flex:0 0 auto}
+.vol .track{flex:1;height:9px;border-radius:6px;background:var(--line2);overflow:hidden}
+.vol .fill{height:100%;width:0%;background:linear-gradient(90deg,#2e9e63,#12854a);border-radius:6px;transition:width .09s linear}
+.vol .pc{font-size:12px;color:var(--ok);font-weight:800;min-width:34px;text-align:left;flex:0 0 auto}
+
+.tbl-wrap{border:2px solid var(--blue);border-radius:14px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead th{background:var(--thead);color:#fff;border-inline-start:1px solid var(--tline);font-size:16.5px;font-weight:900;padding:13px 6px;text-align:center}
+thead th:first-child{border-inline-start:0}
+thead th:nth-child(1){width:42%}
+thead th:nth-child(2){width:35%}
+thead th:nth-child(3){width:23%}
+tbody td{padding:14px 6px;text-align:center;border-bottom:1px solid var(--tline);border-inline-start:1px solid var(--tline);font-size:21px;font-weight:900;letter-spacing:2px}
+tbody tr:last-child td{border-bottom:0}
+tbody td:first-child{border-inline-start:0}
+tbody tr.ok td{background:var(--ok-bg)}
+tbody tr.bad td{background:var(--bad-bg)}
+tbody tr.wanted td{background:var(--wrow);color:var(--wrow-ink)}
+td.st{font-size:0}
+td.st svg{width:25px;height:25px}
+tr.ok td.st{color:var(--ok)}
+tr.bad td.st{color:var(--bad)}
+tr.wanted td.st{color:var(--gold)}
+.empty-tbl{padding:54px 20px;text-align:center;color:var(--muted);font-size:14px;line-height:1.9;font-weight:600}
+.empty-tbl svg{width:44px;height:44px;opacity:.35;margin-bottom:8px}
+
+.count-chip{
+  display:flex;justify-content:center;margin-top:-12px;position:relative;z-index:2
+}
+.count-chip>button{
+  display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1.6px solid var(--line);
+  border-radius:22px;padding:8px 16px;font-size:14px;font-weight:800;box-shadow:var(--shadow)
+}
+.count-chip .num{background:var(--blue);color:#fff;border-radius:8px;padding:1px 9px;font-size:13px;font-weight:900}
+.count-chip svg{width:19px;height:19px;color:var(--muted)}
+.hint{text-align:center;font-size:12px;color:var(--muted);margin:12px 4px 0;line-height:1.8;font-weight:600}
+
+/* ============ LISTS ============ */
+.sec-head{display:flex;align-items:center;gap:8px;margin:2px 0 12px}
+.sec-head h2{flex:1;margin:0;text-align:right;font-size:22px;font-weight:900;display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.sec-head h2 svg{width:23px;height:23px}
+.ibtn{width:42px;height:42px;border-radius:13px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(22,103,201,.25);flex:0 0 auto}
+.ibtn.alt{background:var(--card);color:var(--blue);border:1.6px solid var(--line);box-shadow:var(--shadow)}
+.ibtn.gold-b{color:var(--gold);border-color:var(--gold-line);background:var(--gold-bg)}
+.ibtn svg{width:21px;height:21px}
+.ibtn:active{transform:translateY(1px)}
+.pill-btn{display:inline-flex;align-items:center;gap:7px;background:var(--blue);color:#fff;border-radius:12px;padding:10px 15px;font-size:14.5px;font-weight:800;box-shadow:0 3px 10px rgba(22,103,201,.25)}
+.pill-btn svg{width:17px;height:17px}
+.sub{text-align:center;font-size:12.5px;color:var(--muted);margin:0 0 12px;font-weight:600}
+
+.row-card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+.row-card .plate{font-size:19px;font-weight:900;letter-spacing:1px;flex:0 0 auto;direction:rtl}
+.row-card .mid{flex:1;text-align:center}
+.row-card .badge{display:inline-flex;align-items:center;gap:5px;font-size:14px;font-weight:800;color:var(--ok)}
+.row-card .badge svg{width:17px;height:17px}
+.row-card .badge.w{color:var(--gold)}
+.row-card .date{font-size:11.5px;color:var(--muted);flex:0 0 auto;font-weight:600;letter-spacing:0;direction:ltr;unicode-bidi:isolate}
+.pin{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent);flex:0 0 auto;text-decoration:none}
+.pin svg{width:16px;height:16px}
+.map-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:12px;border-radius:12px;text-decoration:none;
+  background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--blue);font-size:14.5px;font-weight:800}
+.map-btn svg{width:17px;height:17px}
+
+.wcard{background:var(--gold-bg);border:1.6px solid var(--gold-line);border-radius:13px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.wcard .top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.wcard .top .plate{flex:1;font-size:21px;font-weight:900;letter-spacing:1px}
+.wcard .top .tag{display:inline-flex;align-items:center;gap:5px;color:var(--gold);font-size:14.5px;font-weight:800}
+.wcard .top .tag svg{width:17px;height:17px}
+.wcard .ln{font-size:13.5px;color:var(--ink2);margin:3px 0;font-weight:700}
+.wcard .ln i{font-style:normal;color:var(--blue);font-weight:800}
+.wcard .dt{font-size:11.5px;color:var(--muted);text-align:left;margin-top:6px;font-weight:600;direction:ltr;unicode-bidi:isolate}
+.wcard.safe{background:var(--ok-bg);border-color:var(--ok-line)}
+.wcard.safe .top .tag{color:var(--ok)}
+
+.empty{padding:56px 22px;text-align:center;color:var(--muted);line-height:2;font-size:14px;font-weight:600}
+.empty svg{width:52px;height:52px;opacity:.3;margin-bottom:10px}
+.empty b{display:block;color:var(--ink2);font-size:16px;margin-bottom:4px;font-weight:800}
+
+/* ============ MODAL / SHEET ============ */
+.ov{position:fixed;inset:0;background:rgba(8,20,38,.55);backdrop-filter:blur(2px);z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .16s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{background:var(--card);border-radius:20px;width:100%;max-width:360px;padding:22px 20px 12px;box-shadow:var(--shadow-l);animation:pop .2s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.ltr{direction:ltr;display:inline-block;unicode-bidi:isolate}
+.modal .mp{text-align:center;font-size:27px;font-weight:900;letter-spacing:7px;margin-bottom:14px;direction:rtl}
+.modal .mline{font-size:14.5px;color:var(--ink2);text-align:right;margin:5px 0;line-height:1.7;font-weight:700}
+.modal .mline i{font-style:normal;color:var(--muted);font-weight:700}
+.modal .close{display:block;margin:14px 0 4px;color:var(--blue);font-size:16px;font-weight:800;padding:8px}
+.modal.alarm{border:2px solid var(--bad)}
+.modal.alarm .mp{color:var(--bad)}
+.modal .mtag{text-align:center;font-size:15px;font-weight:900;color:var(--bad);margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px}
+.modal .mtag svg{width:20px;height:20px}
+
+.sheet-ov{position:fixed;inset:0;background:rgba(8,20,38,.55);z-index:70;display:flex;align-items:flex-end;animation:fade .16s ease}
+.sheet{background:var(--card);width:100%;max-height:88dvh;border-radius:22px 22px 0 0;padding:8px 16px calc(18px + var(--safe-b));overflow-y:auto;animation:up .24s cubic-bezier(.2,.9,.3,1)}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.grab{width:44px;height:4.5px;border-radius:3px;background:var(--line);margin:6px auto 12px}
+.sheet h3{margin:0 0 4px;font-size:19px;font-weight:900;text-align:center}
+.sheet .sh-sub{text-align:center;font-size:12.5px;color:var(--muted);margin:0 0 16px;font-weight:600}
+.opt{display:flex;align-items:center;gap:12px;width:100%;padding:14px 12px;border-radius:14px;border:1.5px solid var(--line);margin-bottom:9px;text-align:right;background:var(--card)}
+.opt:active{background:var(--line2)}
+.opt .oi{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--blue)}
+.opt .oi svg{width:21px;height:21px}
+.opt .ot{flex:1}
+.opt .ot b{display:block;font-size:15px;font-weight:800}
+.opt .ot span{display:block;font-size:12px;color:var(--muted);margin-top:2px;font-weight:600}
+.opt.danger .oi{background:var(--bad-bg);color:var(--bad)}
+.opt.gold .oi{background:var(--gold-bg);color:var(--gold)}
+.opt.green .oi{background:var(--ok-bg);color:var(--ok)}
+
+.stat{display:flex;gap:9px;margin-bottom:14px}
+.stat div{flex:1;background:var(--line2);border-radius:13px;padding:11px 8px;text-align:center}
+.stat b{display:block;font-size:22px;font-weight:900;color:var(--blue)}
+.stat span{font-size:11.5px;color:var(--muted);font-weight:700}
+
+.search{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);font-size:15px;outline:none;margin-bottom:10px}
+.search:focus{border-color:var(--blue)}
+.wlist{max-height:44dvh;overflow-y:auto;border:1px solid var(--line);border-radius:13px}
+.wl-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid var(--line2);font-size:14px}
+.wl-item:last-child{border-bottom:0}
+.wl-item .p{font-weight:900;font-size:16px;letter-spacing:1px;flex:0 0 auto}
+.wl-item .n{flex:1;color:var(--muted);font-size:12.5px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.wl-item .x{color:var(--bad);padding:5px;flex:0 0 auto}
+.wl-item .x svg{width:17px;height:17px}
+
+.manual-plate{display:flex;gap:8px;margin-bottom:12px;width:100%}
+.manual-plate input{flex:1 1 0;min-width:0;width:100%;padding:14px 8px;border:1.6px solid var(--line);border-radius:12px;text-align:center;font-size:20px;font-weight:900;outline:none;background:var(--card);letter-spacing:3px}
+.manual-plate input:focus{border-color:var(--blue)}
+.manual-plate input.num{flex:1.1 1 0;letter-spacing:5px;direction:ltr}
+
+.toast{position:fixed;bottom:calc(88px + var(--safe-b));right:50%;transform:translateX(50%);background:#0f2744;color:#fff;padding:11px 20px;border-radius:24px;font-size:14px;font-weight:700;z-index:90;box-shadow:var(--shadow-l);animation:fade .16s;max-width:90vw;text-align:center}
+.toast.err{background:var(--bad)}
+.toast.ok{background:var(--ok)}
+
+.kbd-help{background:var(--line2);border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:2;color:var(--ink2);margin-bottom:12px;font-weight:600}
+.kbd-help b{color:var(--blue)}
+.modal.detect{max-width:330px;padding:20px 18px 14px;background:var(--card)}
+html[data-theme="dark"] .modal.detect{background:#242a32}
+.dt-ic{width:54px;height:54px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#e8213c}
+.dt-ic svg{width:46px;height:46px}
+.dt-title{text-align:center;font-size:23px;font-weight:900;margin-bottom:14px}
+html[data-theme="dark"] .modal.detect .dt-title{color:#fff}
+.dt-plate{background:#b3121f;color:#fff;border-radius:11px;padding:13px 10px;text-align:center;
+  font-size:26px;font-weight:900;letter-spacing:5px;margin-bottom:14px;direction:rtl}
+.dt-plate.said{background:transparent;border:2px dashed var(--line);color:var(--muted);font-size:22px;margin-bottom:8px}
+html[data-theme="dark"] .modal.near .dt-plate.said{border-color:#3a4557;color:#9fb0c6}
+.dt-plate.near{background:#8a6413;color:#fff}
+.dt-arrow{text-align:center;color:var(--muted);font-size:20px;margin:-2px 0 8px;line-height:1}
+.modal.near .dt-ic{color:var(--gold)}
+.dt-actions{display:flex;gap:9px;margin-top:14px}
+.dt-actions button{flex:1;padding:13px 8px;border-radius:12px;font-size:15px;font-weight:900}
+.dt-yes{background:var(--gold);color:#241a03}
+.dt-no{background:color-mix(in srgb,var(--muted) 18%,transparent);color:var(--ink)}
+html[data-theme="dark"] .modal.near .dt-no{color:#fff}
+.dt-row{display:flex;gap:12px;align-items:flex-start;padding:5px 2px;font-size:14px;font-weight:700}
+.dt-row .lb{flex:0 0 auto;min-width:96px;color:var(--muted)}
+html[data-theme="dark"] .modal.detect .dt-row .lb{color:#b9c4d2}
+.dt-row .vl{flex:1;text-align:left;word-break:break-all;direction:ltr}
+html[data-theme="dark"] .modal.detect .dt-row .vl{color:#fff}
+.dt-row .vl.ar{direction:rtl;text-align:left}
+.dt-close{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;
+  padding:14px;border-radius:13px;background:#4aa8ff;color:#062845;font-size:16px;font-weight:900}
+html[data-theme="light"] .dt-close{background:var(--blue);color:#fff}
+.map-tools{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
+.mchip{padding:7px 13px;border-radius:20px;border:1.5px solid var(--line);background:var(--card);
+  font-size:13px;font-weight:800;color:var(--ink2);box-shadow:var(--shadow)}
+.mchip.on{border-color:var(--blue);color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent)}
+#mapBox{height:58dvh;min-height:330px;border:2px solid var(--blue);border-radius:14px;overflow:hidden;background:var(--line2);position:relative;z-index:0}
+html[data-theme="dark"] #mapBox .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.86) contrast(.92)}
+.leaflet-container{background:var(--line2)!important;font-family:inherit!important}
+.leaflet-popup-content{font-family:inherit;direction:rtl;text-align:right;font-weight:700;font-size:13.5px;margin:10px 12px}
+.leaflet-popup-content b{font-size:17px;letter-spacing:2px}
+.map-stats{display:flex;gap:8px;margin-top:10px}
+.map-stats div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 6px;text-align:center;box-shadow:var(--shadow)}
+.map-stats b{display:block;font-size:19px;font-weight:900;color:var(--blue)}
+.map-stats b.w{color:var(--gold)}
+.map-stats span{font-size:11px;color:var(--muted);font-weight:700}
+.map-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);
+  font-size:14px;font-weight:600;line-height:1.9;text-align:center;padding:20px}
+.map-empty svg{width:46px;height:46px;opacity:.35;margin-bottom:8px}
+.mk-live{width:16px;height:16px;border-radius:50%;background:#1668d6;border:3px solid #fff;box-shadow:0 0 0 4px rgba(22,104,214,.28)}
+.mk-w{width:22px;height:22px;border-radius:50%;background:#d4111f;border:3px solid #fff;box-shadow:0 0 0 5px rgba(212,17,31,.25);animation:mkpulse 1.6s ease-out infinite}
+@keyframes mkpulse{0%{box-shadow:0 0 0 3px rgba(212,17,31,.45)}70%{box-shadow:0 0 0 13px rgba(212,17,31,0)}100%{box-shadow:0 0 0 3px rgba(212,17,31,0)}}
+.trn-bar{height:8px;border-radius:5px;background:var(--line2);overflow:hidden;margin-bottom:6px}
+.trn-fill{height:100%;background:linear-gradient(90deg,#2e9e63,#12854a);border-radius:5px;transition:width .3s}
+.trn-count{text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:14px}
+.trn-plate{background:var(--card);border:2.5px solid var(--blue);border-radius:16px;padding:20px 12px;text-align:center;margin-bottom:14px;box-shadow:var(--shadow)}
+.trn-letters{font-size:38px;font-weight:900;letter-spacing:10px;line-height:1.2}
+.trn-digits{font-size:38px;font-weight:900;letter-spacing:8px;direction:ltr;margin-top:4px;color:var(--blue)}
+.trn-status{text-align:center;font-size:14px;font-weight:700;color:var(--muted);background:var(--line2);
+  border-radius:12px;padding:11px 12px;margin-bottom:12px;min-height:44px;line-height:1.6}
+.trn-status.live{color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent)}
+.trn-status.ok{color:var(--ok);background:var(--ok-bg)}
+.trn-status.warn{color:var(--gold);background:var(--gold-bg)}
+.trn-status.bad{color:var(--bad);background:var(--bad-bg)}
+.live-txt{background:var(--line2);border-radius:11px;padding:9px 12px;font-size:13px;color:var(--muted);margin-bottom:10px;min-height:38px;text-align:center;font-weight:600;line-height:1.6;word-break:break-word}
+</style>
+</head>
+<body>
+<!-- ==================== LOGIN ==================== -->
+<div id="login">
+  <div class="lg-card">
+    <div class="lg-head">
+      <div class="lg-mark" id="lgMark">
+        <svg viewBox="0 0 100 100" width="40" height="40">
+          <path d="M50 8l32 12v26c0 20-13 34-32 46C31 80 18 66 18 46V20z" fill="none" stroke="#d4af60" stroke-width="4.5" stroke-linejoin="round"/>
+          <rect x="30" y="38" width="40" height="22" rx="4" fill="none" stroke="#d4af60" stroke-width="4"/>
+          <path d="M38 47h4M48 47h4M58 47h4M36 54h28" stroke="#d4af60" stroke-width="3.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1>عرابي</h1>
+      <p>بوابة فحص المركبات</p>
+    </div>
+    <div class="lg-body">
+      <h2>تسجيل الدخول</h2>
+      <div class="field">
+        <label class="fl" for="lgU">اسم المستخدم</label>
+        <input class="fi" id="lgU" type="text" autocomplete="username" spellcheck="false" placeholder="orabi">
+      </div>
+      <div class="field">
+        <label class="fl" for="lgP">كلمة المرور</label>
+        <input class="fi" id="lgP" type="password" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn-main" id="lgGo">دخول</button>
+      <div class="lg-err" id="lgErr"></div>
+      <p class="lg-note">
+        بيانات الدخول الافتراضية: <b>orabi</b> / <b>orabi</b><br>
+        تقدر تغيّرها من إعدادات البرنامج بعد الدخول<br>
+        <span id="verTag" style="opacity:.75">النسخة —</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
+<div id="app" class="hide">
+  <header>
+    <button class="hbtn" id="btnOut" aria-label="خروج">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+    </button>
+    <button class="hbtn" id="btnTrain" aria-label="تدريب النطق">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 10.2V15c0 1.7 2.2 3 5 3s5-1.3 5-3v-4.8"/><path d="M21 7v6"/></svg>
+    </button>
+    <h1>بوابة عرابي</h1>
+    <button class="hbtn" id="btnTheme" aria-label="تبديل الوضع الليلي">
+      <svg id="icMoon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg id="icSun" class="hide" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- ---------- SCAN ---------- -->
+    <section id="vScan">
+      <div class="mic-bar" id="micBar">
+        <button class="mic-ic" id="btnMic" aria-label="تشغيل الجلسة">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></svg>
+        </button>
+        <div class="mic-txt">
+          <b id="micTitle">بدء الجلسة الصوتية</b>
+          <span id="micSub">جاهز للاستماع والتعبئة التلقائية</span>
+        </div>
+        <button class="mic-play" id="btnMic2" aria-label="تشغيل">
+          <svg id="icPlay" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>
+          <svg id="icStop" class="hide" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg>
+        </button>
+      </div>
+
+      <div class="chip-row">
+        <button class="chip gps-off" id="btnGps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+          <span id="gpsTxt">الموقع</span>
+        </button>
+        <button class="chip" id="btnNum">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></svg>
+          وضع الأرقام
+        </button>
+        <button class="chip" id="btnFast">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          الوضع السريع
+        </button>
+      </div>
+
+      <div class="vol">
+        <span class="lb">الصوت</span>
+        <div class="track"><div class="fill" id="volFill"></div></div>
+        <span class="pc" id="volPc">0%</span>
+      </div>
+
+      <div class="live-txt" id="liveTxt">اضغط «بدء الجلسة الصوتية» وانطق اللوحات ورا بعض</div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>الحروف</th><th>الأرقام</th><th>الحالة</th></tr></thead>
+          <tbody id="tbScan"></tbody>
+        </table>
+        <div class="empty-tbl" id="tbEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h2M11 11h2M16 11h2"/></svg>
+          <div>لسه مفيش لوحات في الجلسة دي</div>
+        </div>
+      </div>
+
+      <div class="count-chip">
+        <button id="btnManual">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5v2.2M19.5 16.5v2.2"/><path d="M3.2 16.5v-3.1c0-.7.4-1.3 1-1.6l1-.4 1.7-3.5c.3-.7 1-1.1 1.8-1.1h6.6c.8 0 1.5.4 1.8 1.1l1.7 3.5 1 .4c.6.3 1 .9 1 1.6v3.1z"/><path d="M6 13.6h1.6M16.4 13.6H18"/></svg>
+          لوحات الجلسة <span class="num" id="cnSession">0</span>
+        </button>
+      </div>
+
+      <p class="hint" id="scanHint">
+        مثال: «راء باء كاف اتنين تلاتة أربعة خمسة» ← ر ب ك 2345<br>
+        انطق اللوحة كلها في نَفَس واحد — <b>3 حروف و4 أرقام</b> — وكمّل لوحات ورا بعض<br>
+        <b>لو طلعت غلط:</b> دوس على السطر وصححه — البرنامج بيتعلم نطقك
+      </p>
+    </section>
+
+    <!-- ---------- WANTED ---------- -->
+    <section id="vWanted" class="hide">
+      <div class="sec-head">
+        <button class="pill-btn" id="btnDlMatch">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+          تنزيل
+        </button>
+        <button class="ibtn alt gold-b" id="btnFile" aria-label="ملف المطلوب">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M12 18.5v-6.6M9.4 14.4L12 11.8l2.6 2.6"/></svg>
+        </button>
+        <h2>
+          سجل المطابقات
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+        </h2>
+      </div>
+      <p class="sub" id="wSub">اللوحات المطلوبة اللي ظهرت أثناء الفحص</p>
+      <div id="wList"></div>
+    </section>
+
+    <!-- ---------- MAP ---------- -->
+    <section id="vMap" class="hide">
+      <div class="sec-head">
+        <button class="ibtn alt" id="btnMapDl" aria-label="تنزيل نقاط الخريطة">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+        </button>
+        <h2>
+          خريطة الوردية
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6.4v14L9 18l6 2.4 6-2.4v-14L15 6.4z"/><path d="M9 4v14M15 6.4v14"/></svg>
+        </h2>
+      </div>
+      <div class="map-tools">
+        <button class="mchip" data-f="sess">الجلسة الحالية</button>
+        <button class="mchip on" data-f="today">النهاردة</button>
+        <button class="mchip" data-f="48">آخر 48 ساعة</button>
+        <button class="mchip" id="btnFollow">تتبّعني</button>
+      </div>
+      <div id="mapBox"></div>
+      <div class="map-stats">
+        <div><b id="msN">0</b><span>لوحة</span></div>
+        <div><b class="w" id="msW">0</b><span>مطلوبة</span></div>
+        <div><b id="msKm">0</b><span>كم مسافة</span></div>
+      </div>
+    </section>
+
+    <!-- ---------- ALL ---------- -->
+    <section id="vAll" class="hide">
+      <div class="sec-head">
+        <button class="pill-btn" id="btnDlAll">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
+          تنزيل
+        </button>
+        <h2>
+          السجل الشامل
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 3h6v3H9zM8 11h8M8 15h5"/></svg>
+        </h2>
+      </div>
+      <p class="sub">جميع محاولات الفحص لآخر 48 ساعة</p>
+      <div id="aList"></div>
+    </section>
+  </main>
+
+  <nav>
+    <button class="nb" data-v="map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6.4v14L9 18l6 2.4 6-2.4v-14L15 6.4z"/><path d="M9 4v14M15 6.4v14"/></svg>
+      الخريطة
+    </button>
+    <button class="nb" data-v="all">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      الكل
+    </button>
+    <button class="nb on" data-v="scan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2a1.6 1.6 0 0 0 1.4-.85l.55-1.05A1.4 1.4 0 0 1 10.9 3.4h2.2c.52 0 1 .29 1.25.75l.55 1.05A1.6 1.6 0 0 0 16.3 6h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.4" r="3.4"/></svg>
+      الفحص<span class="nb-badge hide" id="todayBadge">0</span>
+    </button>
+    <button class="nb" data-v="wanted">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      مطلوب
+    </button>
+  </nav>
+</div>
+
+<input type="file" id="fileIn" class="hide" accept=".xlsx,.xlsm,.csv,.txt">
+<input type="file" id="imgIn" class="hide" accept="image/*">
+<input type="file" id="bakIn" class="hide" accept=".json,application/json">
+<input type="file" id="logoIn" class="hide" accept="image/*">
+<div id="ovRoot"></div>
+
+<script>
+/* ================================================================
+   محرك تحليل الكلام العربي (لهجة مصرية) -> لوحات سعودية 3 حروف + 4 أرقام
+   ================================================================ */
+
+const AR_DIAC = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g;
+const AR_IND  = { '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
+                  '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9' };
+
+function toWestDigits(s){ return String(s==null?'':s).replace(/[٠-٩۰-۹]/g, d => AR_IND[d] || d); }
+
+function norm(s){
+  return toWestDigits(s)
+    .replace(AR_DIAC,'')
+    .replace(/[أإآٱ]/g,'ا')
+    .replace(/[ىي]/g,'ي')
+    .replace(/[ةه]/g,'ه')
+    .replace(/ؤ/g,'و')
+    .replace(/ئ/g,'ي')
+    .replace(/ء/g,'')
+    .replace(/[^0-9\u0621-\u064A\s]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+/* الحروف الرسمية للوحات السعودية (17) */
+const OFFICIAL = ['ا','ب','ح','د','ر','س','ص','ط','ع','ق','ك','ل','م','ن','ه','و','ي'];
+const OFFICIAL_SET = new Set(OFFICIAL);
+/* الحروف المسموح بتهجئتها داخل كلمة واحدة */
+const SPELL_SET = new Set([...OFFICIAL,'ج']);
+
+const LAT2AR = { A:'ا',B:'ب',J:'ح',D:'د',R:'ر',S:'س',X:'ص',T:'ط',E:'ع',
+                 G:'ق',K:'ك',L:'ل',Z:'م',N:'ن',H:'ه',U:'و',V:'ي' };
+
+/* ---------- قاموس أسماء الحروف (فصحى + عامية مصرية) ---------- */
+const LETTER_WORDS = {
+  'ا':['الف','الفا','اليف','همزه','هامزه','ا'],
+  'ب':['باء','با','به','بيه','بي','بيه','ب'],
+  'ت':['تاء','تا','ته','تيه','ت'],
+  'ث':['ثاء','ثا','ثه','ث'],
+  'ج':['جيم','جي','جم','ج'],
+  'ح':['حاء','حا','حه','حي','حيه','ح'],
+  'خ':['خاء','خا','خه','خ'],
+  'د':['دال','دا','دل','ديه','د'],
+  'ذ':['ذال','ذا','ذ'],
+  'ر':['راء','را','ره','رع','ري','ريه','ر'],
+  'ز':['زاي','زين','زي','زا','ز'],
+  'س':['سين','سي','سن','سيه','س'],
+  'ش':['شين','شي','ش'],
+  'ص':['صاد','صا','صد','صيه','ص'],
+  'ض':['ضاد','ضا','ض'],
+  'ط':['طاء','طا','طه','طي','طيه','ط'],
+  'ظ':['ظاء','ظا','ظه','ظ'],
+  'ع':['عين','عي','عن','عيه','ع'],
+  'غ':['غين','غي','غ'],
+  'ف':['فاء','فا','فه','ف'],
+  'ق':['قاف','قا','قف','اف','قيه','ق'],
+  'ك':['كاف','كا','كف','كيه','ك'],
+  'ل':['لام','لا','لم','ل'],
+  'م':['ميم','مي','مم','م'],
+  'ن':['نون','نو','نن','نيه','ن'],
+  'ه':['هاء','ها','هه','هي','ه'],
+  'و':['واو','وا','وو','و'],
+  'ي':['ياء','يا','يه','يي','ي']
+};
+
+const W2L = new Map();
+for (const [ltr, words] of Object.entries(LETTER_WORDS)){
+  for (const w of words){
+    const k = norm(w).replace(/[^\u0621-\u064A]/g,'');
+    if (k && !W2L.has(k)) W2L.set(k, ltr);
+  }
+}
+
+/* ---------- قاموس الأرقام بالعامية ---------- */
+/* cat: Z=صفر U=آحاد T=عشرات E=11..19 H=مئات K=آلاف MH=مضاعف«مية» MK=مضاعف«آلاف» */
+const NUM_WORDS = {};
+function addNum(cat, val, words){
+  for (const w of words){ const k = norm(w).replace(/\s/g,''); if (k && !(k in NUM_WORDS)) NUM_WORDS[k]={cat,val}; }
+}
+addNum('Z',0,['صفر','سفر','زيرو']);
+addNum('U',1,['واحد','واحده','وحد','احد','احده','وحده']);
+addNum('U',2,['اتنين','اثنين','تنين','اتنان','اثنان']);
+addNum('U',3,['تلاته','ثلاثه','تلات','ثلاث','تلاثه']);
+addNum('U',4,['اربعه','اربع','ربعه']);
+addNum('U',5,['خمسه','خمس']);
+addNum('U',6,['سته','ست']);
+addNum('U',7,['سبعه','سبع']);
+addNum('U',8,['تمانيه','ثمانيه','تمانه','تمان','ثمان','تمنيه']);
+addNum('U',9,['تسعه','تسع']);
+addNum('T',10,['عشره','عشر']);
+addNum('E',11,['حداشر','احداشر','احدعشر','حدعشر']);
+addNum('E',12,['اتناشر','اثناشر','اتنعشر','اثناعشر']);
+addNum('E',13,['تلاتاشر','ثلاثتاشر','تلتاشر','تلاتهعشر']);
+addNum('E',14,['اربعتاشر','اربعتشر','اربعهعشر']);
+addNum('E',15,['خمستاشر','خمستشر','خمسهعشر']);
+addNum('E',16,['ستاشر','ستشر','ستهعشر']);
+addNum('E',17,['سبعتاشر','سبعتشر','سبعهعشر']);
+addNum('E',18,['تمنتاشر','تمانتاشر','تمانيهعشر']);
+addNum('E',19,['تسعتاشر','تسعتشر','تسعهعشر']);
+addNum('T',20,['عشرين']);
+addNum('T',30,['تلاتين','ثلاثين']);
+addNum('T',40,['اربعين','ربعين']);
+addNum('T',50,['خمسين']);
+addNum('T',60,['ستين']);
+addNum('T',70,['سبعين']);
+addNum('T',80,['تمانين','ثمانين']);
+addNum('T',90,['تسعين']);
+addNum('MH',100,['ميه','مايه','مئه','مايت','ميت']);
+addNum('H',200,['ميتين','مئتين','متين','مايتين']);
+addNum('H',300,['تلتميه','ثلثمايه','تلاتميه','تلتمايه','ثلاثمئه']);
+addNum('H',400,['ربعميه','اربعميه','اربعمايه','ربعمايه']);
+addNum('H',500,['خمسميه','خمسمايه','خمسمئه']);
+addNum('H',600,['ستميه','ستمايه','ستمئه']);
+addNum('H',700,['سبعميه','سبعمايه','سبعمئه']);
+addNum('H',800,['تمنميه','تمانميه','تمنمايه']);
+addNum('H',900,['تسعميه','تسعمايه','تسعمئه']);
+addNum('K',2000,['الفين','الفان']);
+addNum('MK',1000,['الاف','الالاف']);
+/* «ألف» ليها معنيين: حرف أ أو رقم 1000 -> تتحدد حسب السياق */
+const DUAL_ALEF = new Set(['الف']);
+
+const SEPARATORS = new Set(['لوحه','لوحات','اللوحه','التاليه','التالي','بعدين','كمان','تاني','التاني','خلاص','تمام','نقطه','جديده','جديد','اوك','ok','next','ثم']);
+const IGNORE = new Set(['رقم','رقمها','حروف','حروفها','ارقام','ارقامها','ال','يعني','اه','امم','ممم','من','في','علي','عن','مع','دول','كده','كان','بس','مش','لسه','هنا','احنا','انا','انت','ايوه','ايوا','والله','طيب','ماشي','شويه','واحده؟','هيه']);
+
+/* ---------- أدوات ---------- */
+function levenshtein(a,b){
+  if (a===b) return 0;
+  const m=a.length, n=b.length;
+  if (!m||!n) return m||n;
+  let prev=new Array(n+1), cur=new Array(n+1);
+  for (let j=0;j<=n;j++) prev[j]=j;
+  for (let i=1;i<=m;i++){
+    cur[0]=i;
+    for (let j=1;j<=n;j++) cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    const tmp=prev; prev=cur; cur=tmp;
+  }
+  return prev[n];
+}
+const LETTER_KEYS = [...W2L.keys()].filter(k=>k.length>=2);
+function fuzzyLetter(tok){
+  if (tok.length<2 || tok.length>5) return null;
+  let best=null, bd=99, bo=9;
+  for (const k of LETTER_KEYS){
+    if (Math.abs(k.length-tok.length)>1) continue;
+    if (k[0] !== tok[0]) continue;   /* أول حرف لازم يطابق: «نه» ما تبقاش «به» */
+    const d = levenshtein(tok,k);
+    if (d>1) continue;
+    const off = OFFICIAL_SET.has(W2L.get(k)) ? 0 : 1;
+    if (d<bd || (d===bd && off<bo)){ bd=d; bo=off; best=k; }
+  }
+  return best ? W2L.get(best) : null;
+}
+const NUM_KEYS = Object.keys(NUM_WORDS).filter(k=>k.length>=4);
+function fuzzyNumber(tok){
+  if (tok.length<4) return null;
+  let best=null, bd=99;
+  for (const k of NUM_KEYS){
+    if (Math.abs(k.length-tok.length)>1) continue;
+    const d = levenshtein(tok,k);
+    if (d<bd){ bd=d; best=k; }
+  }
+  return (bd<=1 && best) ? {key:best, ...NUM_WORDS[best]} : null;
+}
+/* هل التوكن يتهجّى لـ3 حروف لوحة؟ (ربك -> ر ب ك) */
+function spell3(tok){
+  if (tok.length!==3) return null;
+  const out=[];
+  for (const ch of tok){ if(!SPELL_SET.has(ch)) return null; out.push(ch); }
+  return out;
+}
+
+/* تفكيك كلمة ملزوقة لأسماء حروف: "لوبي" -> ل ب ، "داير" -> د ي */
+function segmentLetters(tok){
+  if (tok.length < 3 || tok.length > 9) return null;
+  const memo = new Map();
+  function go(i, depth){
+    if (i === tok.length) return [];
+    if (depth >= 3) return null;
+    const key = i + '|' + depth;
+    if (memo.has(key)) return memo.get(key);
+    let best = null;
+    for (let len = Math.min(4, tok.length - i); len >= 2; len--){
+      const part = tok.slice(i, i+len);
+      let L = W2L.get(part);
+      if (!L && part.length >= 2) L = fuzzyLetter(part);
+      if (!L) continue;
+      const rest = go(i+len, depth+1);
+      if (rest){ best = [L].concat(rest); break; }
+    }
+    memo.set(key, best);
+    return best;
+  }
+  const r = go(0, 0);
+  return (r && r.length >= 2 && r.length <= 3) ? r : null;
+}
+
+/* ---------- تصنيف التوكن ---------- */
+function classify(t){
+  if (!t) return null;
+  if (/^\d+$/.test(t)) return {k:'digits', v:t, src:t};
+  if (/\d/.test(t)) return {k:'mixed', v:t, src:t};
+  if (IGNORE.has(t)) return null;
+  if (SEPARATORS.has(t)) return {k:'sep', src:t};
+
+  if (DUAL_ALEF.has(t)) return {k:'letter', v:'ا', alt:null, dual:{cat:'K',val:1000}, src:t};
+  if (W2L.has(t))       return {k:'letter', v:W2L.get(t), alt:null, src:t};
+  if (t in NUM_WORDS)   return {k:'num', cat:NUM_WORDS[t].cat, val:NUM_WORDS[t].val, src:t};
+
+  if (t.length>2 && t[0]==='و'){
+    const r=t.slice(1);
+    if (r in NUM_WORDS) return {k:'num', cat:NUM_WORDS[r].cat, val:NUM_WORDS[r].val, src:t};
+    if (DUAL_ALEF.has(r)) return {k:'num', cat:'K', val:1000, src:t};
+    if (W2L.has(r))     return {k:'letter', v:W2L.get(r), alt:null, src:t};
+  }
+  if (t.length>2 && t.startsWith('ال')){
+    const r=t.slice(2);
+    if (r in NUM_WORDS) return {k:'num', cat:NUM_WORDS[r].cat, val:NUM_WORDS[r].val, src:t};
+    if (W2L.has(r))     return {k:'letter', v:W2L.get(r), alt:null, src:t};
+  }
+
+  /* مد الصوت بيكرر الحرف: «راااء»->«را» ، «كااف»->«كاف» */
+  const dd = t.replace(/(.)\1+/g, '$1');
+  if (dd !== t){
+    if (W2L.has(dd))     return {k:'letter', v:W2L.get(dd), alt:null, src:t};
+    if (dd in NUM_WORDS) return {k:'num', cat:NUM_WORDS[dd].cat, val:NUM_WORDS[dd].val, src:t};
+  }
+
+  const sp = spell3(t);
+  if (sp) return {k:'spell', v:sp, src:t};
+
+  const fl = fuzzyLetter(t);
+  if (fl) return {k:'letter', v:fl, alt:null, weak:true, src:t};
+  const fn = fuzzyNumber(t);
+  if (fn) return {k:'num', cat:fn.cat, val:fn.val, src:t};
+  const sg = segmentLetters(t);
+  if (sg) return {k:'seg', v:sg, src:t};
+
+  /* قاعدة اللهجة العامية: أي كلمة قصيرة أولها حرف لوحة = الحرف ده.
+     «حه»->ح  «بيه»->ب  «ره»->ر  «طيه»->ط  «قاااف»->ق ... */
+  if (t.length >= 2 && t.length <= 6 && OFFICIAL_SET.has(t[0]) && !(t in NUM_WORDS)){
+    return {k:'letter1', v:t[0], src:t};
+  }
+  return {k:'noise', src:t};
+}
+
+function tokenize(text){
+  const n = norm(text);
+  if (!n) return [];
+  const out=[];
+  for (const p of n.split(' ')){
+    if (!p) continue;
+    if (/\d/.test(p) && /[\u0621-\u064A]/.test(p)){
+      for (const c of (p.match(/\d+|[\u0621-\u064A]+/g)||[])) out.push(c);
+    } else out.push(p);
+  }
+  return out.map(classify).filter(Boolean);
+}
+
+/* ---------- تجميع عبارة رقمية ---------- */
+function numberPhrase(toks, i){
+  let th=0, hu=0, te=0, un=null, teen=null, last=null, used=0;
+  const canFollow = (c)=>{
+    if (last===null) return true;
+    if (last==='K') return c==='H'||c==='U'||c==='T'||c==='E';
+    if (last==='H') return c==='U'||c==='T'||c==='E';
+    if (last==='U') return c==='T';
+    return false;
+  };
+  while (i+used < toks.length){
+    const t = toks[i+used];
+    if (t.k!=='num') break;
+    const c=t.cat;
+    if (c==='Z'){ if(last!==null) break; un=0; last='Z'; used++; break; }
+    if (c==='MH'){
+      if (last==='U' && un!=null){ hu=un*100; un=null; last='H'; used++; continue; }
+      if (last===null || last==='K'){ hu=100; last='H'; used++; continue; }
+      break;
+    }
+    if (c==='MK'){
+      if (last==='U' && un!=null){ th=un*1000; un=null; last='K'; used++; continue; }
+      break;
+    }
+    if (!canFollow(c)) break;
+    if (c==='K'){ th=t.val; last='K'; used++; continue; }
+    if (c==='H'){ hu=t.val; last='H'; used++; continue; }
+    if (c==='E'){ teen=t.val; last='E'; used++; continue; }
+    if (c==='T'){ te=t.val; last='T'; used++; continue; }
+    if (c==='U'){ un=t.val; last='U'; used++; continue; }
+    break;
+  }
+  if (!used) return null;
+  const val = (teen!=null) ? th+hu+teen : th+hu+te+(un||0);
+  return { used, str:String(val) };
+}
+
+/* ---------- حالة التجميع ---------- */
+function newState(){ return { lt:[], digits:'' }; }
+function cloneState(s){ return { lt:s.lt.map(o=>({v:o.v, alt:o.alt?[...o.alt]:null})), digits:s.digits }; }
+
+/* يحاول يوصل لـ3 حروف: يوسّع التوكنز اللي تتهجّى (دال -> د ا ل) لو محتاج */
+function resolveLetters(lt){
+  const base = lt.map(o=>o.v);
+  if (base.length===3 || base.length===0) return base;
+  const n=lt.length;
+  if (n<=6){
+    let best=null, bestExp=99;
+    for (let mask=1; mask<(1<<n); mask++){
+      const out=[]; let exp=0, ok=true;
+      for (let i=0;i<n;i++){
+        if (mask & (1<<i)){
+          if (!lt[i].alt){ ok=false; break; }
+          out.push(...lt[i].alt); exp++;
+        } else out.push(lt[i].v);
+        if (out.length>3){ ok=false; break; }
+      }
+      if (ok && out.length===3 && exp<bestExp){ bestExp=exp; best=out; }
+    }
+    if (best) return best;
+  }
+  return base.slice(0,3);
+}
+
+/* ---------- المحرك ---------- */
+function parseChunk(text, stateIn){
+  const st = cloneState(stateIn||newState());
+  const toks = tokenize(text);
+  const plates = [];
+  const dropped = [];
+
+  const flush = ()=>{
+    if (!st.lt.length && !st.digits) return;
+    const L = resolveLetters(st.lt);
+    const D = st.digits;
+    /* اللوحة السعودية = 3 حروف + 4 أرقام بالظبط. أي حاجة ناقصة تتلغي. */
+    if (L.length===3 && D.length>=4){
+      plates.push({ letters:L.slice(0,3), digits:D.slice(0,4), complete:true });
+      st.lt=[]; st.digits = D.length>4 ? D.slice(4) : '';
+    } else {
+      dropped.push({ letters:L.slice(0,3), digits:D.slice(0,4) });
+      st.lt=[]; st.digits='';
+    }
+  };
+  const tryEmit = ()=>{
+    if (st.digits.length>=4 && resolveLetters(st.lt).length===3) flush();
+  };
+
+  for (let i=0;i<toks.length;i++){
+    const t = toks[i];
+
+    if (t.k==='sep'){ flush(); continue; }
+    if (t.k==='noise') continue;
+
+    if (t.k==='mixed'){
+      const sub = (t.v.match(/\d+|[\u0621-\u064A]+/g)||[]).join(' ');
+      const r = parseChunk(sub, st);
+      plates.push(...r.plates);
+      dropped.push(...(r.dropped||[]));
+      st.lt = r.state.lt; st.digits = r.state.digits;
+      continue;
+    }
+
+    if (t.k==='letter1'){
+      /* تخمين ضعيف: نستخدمه بس وإحنا لسه بنجمع حروف */
+      if (st.digits.length === 0 && st.lt.length < 3){
+        st.lt.push({v:t.v, alt:null});
+        tryEmit();
+      }
+      continue;
+    }
+
+    if (t.k==='seg'){
+      /* تخمين حروف من كلمة ملزوقة: بنستخدمه بس وإحنا لسه في مرحلة الحروف */
+      if (st.digits.length === 0 && st.lt.length + t.v.length <= 3){
+        st.lt.push(...t.v.map(v=>({v, alt:null})));
+        tryEmit();
+      }
+      continue;
+    }
+
+    if (t.k==='letter' || t.k==='spell'){
+      /* «ألف» وسط الأرقام = 1000 مش حرف */
+      if (t.dual && (st.digits.length>0 || st.lt.length>=3)){
+        const ph = numberPhrase([{k:'num',cat:t.dual.cat,val:t.dual.val}, ...toks.slice(i+1)], 0);
+        if (ph){ st.digits += ph.str; i += ph.used-1; tryEmit(); continue; }
+      }
+      const adding = (t.k==='spell') ? t.v.length : 1;
+      if (st.digits.length>0 && resolveLetters(st.lt).length>=3) flush();
+      if (st.lt.length + adding > 3 && st.digits.length===0) flush();
+      if (t.k==='spell') st.lt.push(...t.v.map(v=>({v,alt:null})));
+      else st.lt.push({v:t.v, alt:t.alt});
+      tryEmit();
+      continue;
+    }
+
+    if (t.k==='digits'){
+      st.digits += t.v;
+      tryEmit();
+      if (st.digits.length>8) st.digits = st.digits.slice(0,4);
+      continue;
+    }
+
+    if (t.k==='num'){
+      const ph = numberPhrase(toks, i);
+      if (ph){ st.digits += ph.str; i += ph.used-1; tryEmit(); }
+      continue;
+    }
+  }
+  return { plates, dropped, state: st };
+}
+
+/* وضع الأرقام: نتجاهل الحروف تمامًا ونجمّع 4 أرقام */
+function parseDigits(text, stateIn){
+  const st = cloneState(stateIn || newState());
+  const toks = tokenize(text);
+  const plates = [];
+  const emit = ()=>{
+    while (st.digits.length >= 4){
+      plates.push({ letters:[], digits: st.digits.slice(0,4), complete:true });
+      st.digits = st.digits.slice(4);
+    }
+  };
+  for (let i=0;i<toks.length;i++){
+    const t = toks[i];
+    if (t.k === 'sep'){ st.digits = ''; continue; }
+    if (t.k === 'digits'){ st.digits += t.v; emit(); continue; }
+    if (t.k === 'mixed'){ st.digits += (t.v.match(/\d+/g)||[]).join(''); emit(); continue; }
+    if (t.k === 'num'){
+      const ph = numberPhrase(toks, i);
+      if (ph){ st.digits += ph.str; i += ph.used - 1; emit(); }
+      continue;
+    }
+  }
+  st.lt = [];
+  return { plates, dropped: [], state: st };
+}
+
+function scoreResult(r){
+  let s = 0;
+  for (const p of r.plates) if (p.complete) s += 100;
+  s -= (r.dropped ? r.dropped.length : 0) * 20;
+  s += resolveLetters(r.state.lt).length * 4 + Math.min(r.state.digits.length, 4) * 3;
+  return s;
+}
+
+/*
+  تصفية الضوضاء: الكلام العادي مفيهوش أرقام ولا أسماء حروف صريحة.
+  اللوحة لازم يبقى فيها أرقام، أو أسماء حروف واضحة على الأقل.
+*/
+function speechQuality(text){
+  const toks = tokenize(text);
+  let digits = 0, strongL = 0, weak = 0, noise = 0, total = 0;
+  for (const t of toks){
+    if (t.k === 'sep') continue;
+    total++;
+    if (t.k === 'digits'){ digits += t.v.length; continue; }
+    if (t.k === 'mixed'){ digits += (t.v.match(/\d/g)||[]).length; continue; }
+    if (t.k === 'num'){ digits += 1; continue; }
+    if (t.k === 'letter'){ t.weak ? weak++ : strongL++; continue; }
+    if (t.k === 'spell'){ strongL += 2; continue; }
+    if (t.k === 'seg' || t.k === 'letter1'){ weak++; continue; }
+    noise++;
+  }
+  let ok = false, why = '';
+  if (digits >= 4)                                    { ok = true;  why = 'أرقام كاملة'; }
+  else if (digits >= 2 && noise <= 2)                 { ok = true;  why = 'أرقام'; }
+  else if (digits === 0 && strongL >= 2 && weak === 0 && noise === 0) { ok = true; why = 'حروف واضحة'; }
+  else if (digits >= 1 && strongL >= 2 && noise <= 1) { ok = true;  why = 'حروف وأرقام'; }
+  else                                                { ok = false; why = 'كلام مش لوحة'; }
+  return { ok, why, digits, strongL, weak, noise, total };
+}
+
+const PlateEngine = { norm, tokenize, parseChunk, parseDigits, newState, cloneState, resolveLetters,
+                      scoreResult, speechQuality, segmentLetters, OFFICIAL, OFFICIAL_SET, LAT2AR, toWestDigits, W2L, NUM_WORDS };
+if (typeof window!=='undefined') window.PlateEngine = PlateEngine;
+
+/* ================================================================
+   بوابة عرابي - منطق التطبيق
+   ================================================================ */
+(function(){
+'use strict';
+const APP_VERSION = '3.5';
+const PE = window.PlateEngine;
+const $  = id => document.getElementById(id);
+
+/* ---------------- تخزين دائم (يشتغل في كل البيئات) ---------------- */
+const Store = (()=>{
+  const mem = {};
+  const hasWS = (typeof window.storage!=='undefined' && window.storage && typeof window.storage.get==='function');
+  let hasLS = false;
+  try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); hasLS = true; } catch(e){ hasLS = false; }
+  return {
+    async get(k, def){
+      try{
+        if (hasWS){ const r = await window.storage.get(k); return r ? JSON.parse(r.value) : def; }
+        if (hasLS){ const v = localStorage.getItem(k); return v==null ? def : JSON.parse(v); }
+      }catch(e){}
+      return (k in mem) ? mem[k] : def;
+    },
+    async set(k, v){
+      mem[k]=v;
+      try{
+        if (hasWS){ await window.storage.set(k, JSON.stringify(v)); return true; }
+        if (hasLS){ localStorage.setItem(k, JSON.stringify(v)); return true; }
+      }catch(e){}
+      return false;
+    }
+  };
+})();
+
+const K = { WANTED:'arb_wanted', LOG:'arb_log', MATCH:'arb_match', CFG:'arb_cfg', SNAP:'arb_snap' };
+
+/* ---------------- الحالة ---------------- */
+const S = {
+  cfg: { user:'orabi', pass:'orabi', dark:false, fast:false, sound:true, gps:true, near:true, numMode:false, autoBackup:true, lastBackup:0, sessionNo:0 },
+  wanted: [],          /* [{L,D,key,name,type,vin}] */
+  wmap: new Map(),
+  log: [],             /* كل الفحوصات */
+  match: [],           /* المطابقات */
+  session: [],         /* لوحات الجلسة الحالية */
+  view: 'scan',
+  gps: { lat:null, lng:null, acc:null, ts:0, state:'off', err:'' },  /* الموقع الحالي */
+  sess: 0,
+  nearAsked: new Set(),
+  listening: false,
+  lastPlate: '', lastPlateTs: 0
+};
+
+/* ---------------- أدوات عامة ---------------- */
+const pad = n => String(n).padStart(2,'0');
+function fmtDate(ts){
+  const d = new Date(ts);
+  return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function toast(msg, kind){
+  const t = document.createElement('div');
+  t.className = 'toast' + (kind ? ' '+kind : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .25s'; setTimeout(()=>t.remove(),260); }, 2300);
+}
+function hasLoc(r){ return typeof r.lat === 'number' && typeof r.lng === 'number'; }
+function mapsUrl(r){ return 'https://www.google.com/maps?q=' + r.lat.toFixed(6) + ',' + r.lng.toFixed(6); }
+function locText(r){
+  if (!hasLoc(r)) return 'مفيش موقع مسجّل';
+  return r.lat.toFixed(5) + ' , ' + r.lng.toFixed(5) + (r.acc ? '  (±' + Math.round(r.acc) + ' م)' : '');
+}
+const IC_PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+
+function normKey(letters, digits){
+  return letters.replace(/\s/g,'') + '#' + String(parseInt(digits,10)||0);
+}
+function beep(times){
+  if (!S.cfg.sound) return;
+  try{
+    const C = window.AudioContext || window.webkitAudioContext; if(!C) return;
+    const ctx = new C(); let t = ctx.currentTime;
+    for (let i=0;i<(times||1);i++){
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type='square'; o.frequency.setValueAtTime(i%2?760:980, t);
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.22,t+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,t+.20);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+.22);
+      t += .26;
+    }
+    setTimeout(()=>{ try{ctx.close();}catch(e){} }, 1600);
+  }catch(e){}
+}
+function buzz(p){ try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} }
+
+/* ---------------- نوافذ ---------------- */
+function closeOv(){ $('ovRoot').innerHTML=''; }
+function showModal(html, cls){
+  $('ovRoot').innerHTML =
+    `<div class="ov" data-x="1"><div class="modal ${cls||''}">${html}</div></div>`;
+  $('ovRoot').querySelector('.ov').addEventListener('click', e=>{ if(e.target.dataset.x) closeOv(); });
+  const c = $('ovRoot').querySelector('[data-close]');
+  if (c) c.addEventListener('click', closeOv);
+}
+function showSheet(html){
+  $('ovRoot').innerHTML =
+    `<div class="sheet-ov" data-x="1"><div class="sheet"><div class="grab"></div>${html}</div></div>`;
+  $('ovRoot').querySelector('.sheet-ov').addEventListener('click', e=>{ if(e.target.dataset.x) closeOv(); });
+}
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------------- بناء خريطة المطلوب ---------------- */
+function rebuildWanted(){
+  S.wmap = new Map();
+  for (const w of S.wanted){
+    S.wmap.set(w.key, w);
+    S.wmap.set(w.L + '#' + w.D, w);
+  }
+}
+/* ---------------- التصحيح بالقرب ---------------- */
+/* حروف بيختلط فيها التعرّف الصوتي */
+const CONFUSE_PAIRS = [['ب','ن'],['ب','ت'],['ب','ي'],['ب','م'],['ن','ت'],['ن','ي'],['ن','ل'],['ن','م'],
+  ['د','ذ'],['د','ض'],['د','ط'],['ر','ز'],['س','ص'],['س','ش'],['ص','ض'],['ط','ت'],['ط','ظ'],
+  ['ع','غ'],['ع','ا'],['ق','ك'],['ق','غ'],['ه','ح'],['ح','خ'],['و','ا'],['ي','ا'],['ي','ه'],['ل','ا']];
+const CONFUSE = new Set();
+for (const [a,b] of CONFUSE_PAIRS){ CONFUSE.add(a+b); CONFUSE.add(b+a); }
+
+const pad4 = d => String(d||'').padStart(4,'0').slice(-4);
+function diffPos(a,b){
+  const out=[];
+  for (let i=0;i<Math.max(a.length,b.length);i++) if (a[i]!==b[i]) out.push(i);
+  return out;
+}
+function isSwap(a,b){
+  const d = diffPos(a,b);
+  return d.length===2 && d[1]-d[0]===1 && a[d[0]]===b[d[1]] && a[d[1]]===b[d[0]];
+}
+
+/* يرجّع أقرب لوحة مطلوبة لو الفرق رقم واحد أو حرف واحد قريب في النطق */
+function findNear(letters, digits){
+  const D = pad4(digits);
+  let best = null, bs = 0;
+  for (const w of S.wanted){
+    const wD = pad4(w.D);
+    if (w.L === letters && wD === D) return null;      /* دي مطابقة تامة مش قريبة */
+    let sc = 0, why = '';
+    if (w.L === letters){
+      const d = diffPos(wD, D);
+      if (d.length === 1){ sc = 100; why = 'digit'; }
+      else if (isSwap(wD, D)){ sc = 90; why = 'swap'; }
+    } else if (wD === D && w.L.length === letters.length){
+      const dl = diffPos(w.L, letters);
+      if (dl.length === 1 && CONFUSE.has(w.L[dl[0]] + letters[dl[0]])){ sc = 80; why = 'letter'; }
+    }
+    if (sc > bs){ bs = sc; best = { w, why }; }
+  }
+  return best;
+}
+
+/* كل اللوحات المطلوبة اللي أرقامها زي دي (بغض النظر عن الحروف) */
+function findByDigits(digits){
+  const D = pad4(digits);
+  return S.wanted.filter(w => pad4(w.D) === D);
+}
+
+function findWanted(letters, digits){
+  return S.wmap.get(normKey(letters,digits)) || S.wmap.get(letters+'#'+digits) || null;
+}
+
+/* ================================================================
+   العرض
+   ================================================================ */
+const IC_OK  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.4 12.3l2.5 2.5 4.7-5"/></svg>';
+const IC_BAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2M12 16.4h.01"/></svg>';
+const IC_WARN= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>';
+
+function renderScan(){
+  const tb = $('tbScan'), em = $('tbEmpty');
+  const rows = S.session.slice(-40).reverse();
+  if (!rows.length){ tb.innerHTML=''; em.classList.remove('hide'); }
+  else {
+    em.classList.add('hide');
+    tb.innerHTML = rows.map(r=>{
+      const cls = r.wanted ? 'wanted' : (r.complete ? 'ok' : 'bad');
+      const ic  = r.wanted ? IC_WARN : (r.complete ? IC_OK : IC_BAD);
+      return `<tr class="${cls}" data-k="${esc(r.id)}"><td>${r.L ? r.L.split('').join(' ') : '—'}</td><td>${esc(r.D||'—')}</td><td class="st">${ic}</td></tr>`;
+    }).join('');
+    tb.querySelectorAll('tr').forEach(tr=>tr.addEventListener('click',()=>openRow(tr.dataset.k)));
+  }
+  $('cnSession').textContent = S.session.length;
+}
+
+function renderWanted(){
+  const box = $('wList');
+  if (!S.match.length){
+    box.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <b>مفيش مطابقات لحد دلوقتي</b>
+      ارفع ملف اللوحات المطلوبة من أيقونة الملف فوق،<br>وابدأ الفحص الصوتي
+    </div>`;
+    $('wSub').textContent = `قاعدة البيانات: ${S.wanted.length} لوحة مطلوبة`;
+    return;
+  }
+  $('wSub').textContent = `${S.match.length} مطابقة — قاعدة البيانات: ${S.wanted.length} لوحة`;
+  box.innerHTML = S.match.slice().reverse().map(m=>`
+    <div class="wcard">
+      <div class="top">
+        <span class="plate">${m.L.split('').join('')}${m.D}</span>
+        <span class="tag">مطلوبة ${IC_WARN}</span>
+      </div>
+      <div class="ln"><i>الجهة:</i> ${esc(m.name||'—')}</div>
+      <div class="ln"><i>النوع:</i> ${esc(m.type||'—')}</div>
+      <div class="ln"><i>رقم الشاسية:</i> ${esc(m.vin||'—')}</div>
+      <div class="ln"><i>موقع الرصد:</i> ${esc(locText(m))}</div>
+      ${hasLoc(m) ? `<a class="map-btn" href="${mapsUrl(m)}" target="_blank" rel="noopener">${IC_PIN} فتح الموقع في الخرائط</a>` : ''}
+      <div class="dt">${fmtDate(m.t)}</div>
+    </div>`).join('');
+}
+
+function renderAll(){
+  const cutoff = Date.now() - 48*3600*1000;
+  const rows = S.log.filter(r=>r.t>=cutoff).slice().reverse();
+  const box = $('aList');
+  if (!rows.length){
+    box.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 3h6v3H9zM8 11h8M8 15h5"/></svg>
+      <b>السجل فاضي</b>
+      كل لوحة تتفحص هتتسجل هنا لمدة 48 ساعة
+    </div>` + settingsLink();
+    const s0 = box.querySelector('#lnkSet'); if (s0) s0.addEventListener('click', openSettings);
+    return;
+  }
+  box.innerHTML = rows.map(r=>`
+    <div class="row-card">
+      <span class="plate">${r.L}${r.D}</span>
+      <span class="mid"><span class="badge ${r.wanted?'w':''}">${r.wanted?'مطلوبة':'سليمة'} ${r.wanted?IC_WARN:IC_OK}</span></span>
+      ${hasLoc(r) ? `<a class="pin" href="${mapsUrl(r)}" target="_blank" rel="noopener" title="فتح الموقع">${IC_PIN}</a>` : ''}
+      <span class="date">${fmtDate(r.t)}</span>
+    </div>`).join('') + settingsLink();
+  const sl = box.querySelector('#lnkSet'); if (sl) sl.addEventListener('click', openSettings);
+}
+function settingsLink(){
+  return `<div style="text-align:center;margin:18px 0 4px"><button id="lnkSet" style="color:var(--muted);font-size:13px;font-weight:700;padding:8px 14px">الإعدادات وبيانات الدخول</button></div>`;
+}
+
+/* عدد لوحات النهاردة جنب تبويب «الفحص» */
+function todayCount(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  const t0 = d.getTime();
+  const rows = S.log.filter(r => r.t >= t0);
+  return { n: rows.length, w: rows.filter(r=>r.wanted).length };
+}
+function updateBadge(){
+  const el = $('todayBadge'); if (!el) return;
+  const c = todayCount();
+  el.classList.toggle('hide', c.n === 0);
+  el.classList.toggle('w', c.w > 0);
+  el.textContent = c.n > 999 ? '999+' : c.n;
+  el.title = `النهاردة: ${c.n} لوحة، منهم ${c.w} مطلوبة`;
+}
+
+function render(){
+  $('vScan').classList.toggle('hide', S.view!=='scan');
+  $('vWanted').classList.toggle('hide', S.view!=='wanted');
+  $('vAll').classList.toggle('hide', S.view!=='all');
+  $('vMap').classList.toggle('hide', S.view!=='map');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on', b.dataset.v===S.view));
+  if (S.view==='scan') renderScan();
+  if (S.view==='wanted') renderWanted();
+  if (S.view==='all') renderAll();
+  if (S.view==='map') renderMap();
+  updateBadge();
+}
+
+/* ================================================================
+   تسجيل لوحة
+   ================================================================ */
+async function addPlate(letters, digits, complete, silent, utt, raw){
+  const L = letters.join('');
+  const D = digits || '';
+  const now = Date.now();
+
+  if (complete){
+    const sig = L+D;
+    if (sig===S.lastPlate && now - S.lastPlateTs < 2500) return;
+    S.lastPlate = sig; S.lastPlateTs = now;
+  }
+
+  const hit = complete ? findWanted(L, D) : null;
+  const g = S.gps;
+  const rec = { id:'p'+now+'_'+Math.random().toString(36).slice(2,6), L, D, t:now,
+                complete:!!complete, wanted:!!hit, utt:utt||0, raw:raw||'',
+                sess: S.sess || 0,
+                lat: g.lat, lng: g.lng, acc: g.acc, gts: g.ts,
+                name:hit?hit.name:'', type:hit?hit.type:'', vin:hit?hit.vin:'' };
+
+  S.session.push(rec);
+  if (complete){
+    S.log.push(rec);
+    if (S.log.length>3000) S.log = S.log.slice(-2000);
+    await Store.set(K.LOG, S.log);
+  }
+  if (hit){
+    S.match.push(rec);
+    if (S.match.length>1500) S.match = S.match.slice(-1000);
+    await Store.set(K.MATCH, S.match);
+    if (!silent) alertWanted(rec);
+  } else if (complete && !silent){
+    /* سؤال «اللوحات اللي بنفس الأرقام» بيشتغل في وضع الأرقام بس.
+       في الوضع العادي بنكتفي بالتصحيح بالقرب. */
+    if (S.cfg.numMode || !L) askDigits(rec);
+    else maybeNear(rec);
+  }
+  updateBadge();
+  if (S.view==='scan') renderScan(); else render();
+}
+
+const IC_TRI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.2M12 17h.01"/></svg>';
+
+/* ---------------- تعلّم النطق من تصحيحات المستخدم ---------------- */
+/* بنخزّن: عبارة الحروف اللي المتصفح سمعها  ->  الحروف الصح */
+function learnPhrase(raw, letters){
+  if (!raw || letters.length !== 3) return false;
+  const toks = PE.tokenize(raw);
+  const parts = [];
+  for (const t of toks){
+    if (t.k === 'digits' || t.k === 'num' || t.k === 'sep') break;
+    if (t.src) parts.push(t.src);
+  }
+  const key = parts.join(' ').trim();
+  if (!key || key.length < 2) return false;
+  S.cfg.learn = S.cfg.learn || {};
+  if (S.cfg.learn[key] === letters) return false;
+  S.cfg.learn[key] = letters;
+  Store.set(K.CFG, S.cfg);
+  scheduleSnapshot();
+  return true;
+}
+function applyLearn(text){
+  const map = S.cfg.learn;
+  if (!map) return text;
+  let n = PE.norm(text);
+  const keys = Object.keys(map).sort((a,b)=>b.length-a.length);
+  for (const k of keys){
+    if (!k) continue;
+    if (n.indexOf(k) !== -1) n = n.split(k).join(' ' + map[k].split('').join(' ') + ' ');
+  }
+  return n.replace(/\s+/g,' ').trim();
+}
+
+/* شيل صفوف الجملة الحالية عشان نعيد تحليلها بالنص الكامل */
+function removeUttRows(id){
+  if (!id) return true;
+  if (S.session.some(r => r.utt === id && r.wanted)) return false;
+  const before = S.session.length;
+  S.session = S.session.filter(r => r.utt !== id);
+  if (S.session.length === before) return true;
+  S.log   = S.log.filter(r => r.utt !== id);
+  S.match = S.match.filter(r => r.utt !== id);
+  S.lastPlate = ''; S.lastPlateTs = 0;
+  Store.set(K.LOG, S.log);
+  if (S.view === 'scan') renderScan();
+  return true;
+}
+
+/* يسأل المستخدم: تقصد اللوحة المطلوبة دي؟ */
+function askNear(rec, cand){
+  const w = cand.w;
+  const reason = cand.why === 'digit'  ? 'رقم واحد مختلف'
+               : cand.why === 'swap'   ? 'رقمين متبادلين'
+               : 'حرف واحد قريب في النطق';
+  beep(1); buzz([90,70,90]);
+  showModal(`
+    <div class="dt-ic">${IC_WARN}</div>
+    <div class="dt-title">قريبة من لوحة مطلوبة</div>
+    <div class="dt-plate said">${rec.L} ${rec.D}</div>
+    <div class="dt-arrow">▼ ${esc(reason)} ▼</div>
+    <div class="dt-plate near">${w.L} ${w.D}</div>
+    <div class="dt-row"><span class="lb">الجهة</span><span class="vl ar">${esc(w.name||'—')}</span></div>
+    <div class="dt-row"><span class="lb">النوع</span><span class="vl">${esc(w.type||'—')}</span></div>
+    <div class="dt-actions">
+      <button class="dt-yes" id="nearYes">أيوه، دي هي</button>
+      <button class="dt-no"  id="nearNo">لأ، سيبها</button>
+    </div>`, 'near');
+
+  $('nearNo').addEventListener('click', closeOv);
+  $('nearYes').addEventListener('click', async ()=>{
+    closeOv();
+    const keep = { lat:rec.lat, lng:rec.lng, acc:rec.acc, gts:rec.gts, sess:rec.sess };
+    S.session = S.session.filter(x=>x.id!==rec.id);
+    S.log     = S.log.filter(x=>x.id!==rec.id);
+    S.match   = S.match.filter(x=>x.id!==rec.id);
+    if (w.L !== rec.L) learnPhrase(rec.raw, w.L);
+    S.lastPlate = '';
+    await addPlate(w.L.split(''), pad4(w.D), true);
+    const nr = S.session[S.session.length-1];
+    if (nr && typeof keep.lat === 'number'){ Object.assign(nr, keep); Store.set(K.LOG,S.log); Store.set(K.MATCH,S.match); }
+    renderScan();
+  });
+}
+
+/* الأرقام مطابقة لواحدة أو أكتر في المطلوب -> نسأل المستخدم يأكد */
+function askDigits(rec){
+  const cands = findByDigits(rec.D);
+  if (!cands.length) return;
+  const key = 'D' + rec.L + rec.D;
+  if (S.nearAsked.has(key)) return;
+  S.nearAsked.add(key);
+
+  pauseForWanted();
+  beep(2); buzz([120,80,120]);
+
+  const heard = rec.L
+    ? `<div class="dt-row"><span class="lb">اللي سمعته</span><span class="vl ar">${rec.L.split('').join(' ')}</span></div>`
+    : '';
+
+  showModal(`
+    <div class="dt-ic">${IC_TRI}</div>
+    <div class="dt-title">أرقام مطابقة للمطلوب</div>
+    <div class="dt-plate">${rec.D}</div>
+    ${heard}
+    <div class="dt-row"><span class="lb">بص على اللوحة</span><span class="vl ar">الحروف دي؟</span></div>
+    <div id="dgList" style="margin-top:6px"></div>
+    <button class="dt-no dt-close" id="dgNo" style="background:color-mix(in srgb,var(--muted) 18%,transparent);color:var(--ink)">لأ، مش أي واحدة فيهم</button>`, 'detect');
+
+  $('dgList').innerHTML = cands.map((w,i)=>`
+    <button class="dt-yes" data-i="${i}" style="width:100%;margin-bottom:8px;padding:13px 10px;border-radius:12px;text-align:center">
+      <span style="font-size:21px;font-weight:900;letter-spacing:4px">${w.L.split('').join(' ')}</span>
+      <span style="display:block;font-size:12.5px;font-weight:700;opacity:.85;margin-top:3px">${esc(w.name||'—')}${w.type?' — '+esc(w.type):''}</span>
+    </button>`).join('');
+
+  $('dgList').querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const w = cands[+btn.dataset.i];
+      closeOv();
+      const keep = { lat:rec.lat, lng:rec.lng, acc:rec.acc, gts:rec.gts, sess:rec.sess };
+      S.session = S.session.filter(x=>x.id!==rec.id);
+      S.log     = S.log.filter(x=>x.id!==rec.id);
+      S.match   = S.match.filter(x=>x.id!==rec.id);
+      /* لو الحروف اتقرت غلط، البرنامج يتعلّم النطق ده */
+      if (rec.L && rec.L !== w.L) learnPhrase(rec.raw, w.L);
+      S.lastPlate = '';
+      await addPlate(w.L.split(''), pad4(w.D), true);
+      const nr = S.session[S.session.length-1];
+      if (nr && typeof keep.lat === 'number'){ Object.assign(nr, keep); Store.set(K.LOG,S.log); Store.set(K.MATCH,S.match); }
+      renderScan();
+    });
+  });
+  $('dgNo').addEventListener('click', closeOv);
+}
+
+function maybeNear(rec){
+  if (S.cfg.near === false || !S.wanted.length) return;
+  const key = rec.L + rec.D;
+  if (S.nearAsked.has(key)) return;
+  const cand = findNear(rec.L, rec.D);
+  if (!cand) return;
+  S.nearAsked.add(key);
+  askNear(rec, cand);
+}
+
+function alertWanted(rec){
+  beep(3); buzz([220,90,220,90,320]);
+  pauseForWanted();
+  showModal(`
+    <div class="dt-ic">${IC_TRI}</div>
+    <div class="dt-title">تم رصد لوحة مطلوبة</div>
+    <div class="dt-plate">${rec.L} ${rec.D}</div>
+    <div class="dt-row"><span class="lb">الجهة</span><span class="vl ar">${esc(rec.name||'—')}</span></div>
+    <div class="dt-row"><span class="lb">رقم الشاسية</span><span class="vl">${esc(rec.vin||'—')}</span></div>
+    <div class="dt-row"><span class="lb">نوع المركبة</span><span class="vl">${esc(rec.type||'—')}</span></div>
+    <div class="dt-row"><span class="lb">موقع الرصد</span><span class="vl">${esc(locText(rec))}</span></div>
+    ${hasLoc(rec) ? `<a class="map-btn" href="${mapsUrl(rec)}" target="_blank" rel="noopener">${IC_PIN} فتح الموقع في الخرائط</a>` : ''}
+    <button class="dt-close" data-close>
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      إغلاق
+    </button>`, 'detect');
+}
+
+function openRow(id){
+  const r = S.session.find(x=>x.id===id); if(!r) return;
+  showModal(`
+    <div class="mp">${r.L.split('').join(' ')} <span class="ltr">${(r.D||'').split('').join(' ')}</span></div>
+    <div class="mline">الحالة: <i>${r.wanted?'مطلوبة':(r.complete?'سليمة':'ناقصة — أعد النطق')}</i></div>
+    ${r.wanted?`<div class="mline">مطلوب لدى: <i>${esc(r.name||'—')}</i></div>
+                <div class="mline">رقم الشاسية: <i>${esc(r.vin||'-')}</i></div>
+                <div class="mline">نوع المركبة: <i>${esc(r.type||'-')}</i></div>`:''}
+    <div class="mline">الوقت: <i>${fmtDate(r.t)}</i></div>
+    <div class="mline">الموقع: <i>${esc(locText(r))}</i></div>
+    ${hasLoc(r) ? `<a class="map-btn" href="${mapsUrl(r)}" target="_blank" rel="noopener">${IC_PIN} فتح الموقع في الخرائط</a>` : ''}
+    <div class="manual-plate" style="margin-top:14px">
+      <input id="edL" maxlength="3" value="${esc(r.L)}" placeholder="ر ب ك">
+      <input id="edD" class="num" maxlength="4" value="${esc(r.D)}" placeholder="2345" inputmode="numeric">
+    </div>
+    <button class="dt-close" id="edSave">حفظ التعديل</button>
+    <button class="close" style="color:var(--bad)" id="delRow">حذف من الجلسة</button>
+    <button class="close" data-close>إغلاق</button>`);
+  $('edSave').addEventListener('click', async ()=>{
+    const L = PE.norm($('edL').value).replace(/\s/g,'').slice(0,3);
+    const D = PE.toWestDigits($('edD').value).replace(/\D/g,'').slice(0,4);
+    if (L.length!==3 || D.length!==4) return toast('لازم 3 حروف و4 أرقام','err');
+    S.session = S.session.filter(x=>x.id!==id);
+    S.log   = S.log.filter(x=>x.id!==id);
+    S.match = S.match.filter(x=>x.id!==id);
+    closeOv();
+    const keep = { lat:r.lat, lng:r.lng, acc:r.acc, gts:r.gts, sess:r.sess };
+    const learned = learnPhrase(r.raw, L);
+    S.lastPlate=''; await addPlate(L.split(''), D, true);
+    /* التعديل ما يضيّعش موقع الرصد الأصلي */
+    const nr = S.session[S.session.length-1];
+    if (nr && typeof keep.lat === 'number'){
+      Object.assign(nr, keep);
+      Store.set(K.LOG, S.log); Store.set(K.MATCH, S.match); renderScan();
+    }
+    if (learned) toast('اتعلمت النطق ده — هيتقرا صح المرة الجاية', 'ok');
+  });
+  $('delRow').addEventListener('click', ()=>{
+    S.session = S.session.filter(x=>x.id!==id);
+    S.log   = S.log.filter(x=>x.id!==id);
+    S.match = S.match.filter(x=>x.id!==id);
+    Store.set(K.LOG, S.log); Store.set(K.MATCH, S.match);
+    closeOv(); renderScan();
+  });
+}
+
+/* --- يكمل في الجزء التالي --- */
+
+/* ================================================================
+   محرك الاستماع الصوتي
+   ================================================================ */
+const SRClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+
+let rec = null, want = false, procIdx = 0, pending = PE.newState();
+let idleTimer = null, restartTimer = null, watchTimer = null;
+let audioCtx = null, analyser = null, micStream = null, volRAF = 0;
+let fbMeter = false, fbLevel = 0, fbTimer = 0, alertPaused = false, starting = false;
+let backoff = 260, lastStartAt = 0;
+let baseState = PE.newState(), uttText = '', uttId = 0, uttActive = false, lastFinalAt = 0;
+
+/* بيانات التشخيص */
+const diag = {
+  support: !!SRClass,
+  secure: !!window.isSecureContext,
+  proto: location.protocol,
+  gum: 'لم يُجرَّب',
+  perm: 'غير معروف',
+  starts: 0, results: 0, finals: 0,
+  lastErr: '—', lastText: '—', mode: '—'
+};
+
+/* ================= الموقع الجغرافي ================= */
+let gpsWatch = null;
+
+function gpsChip(){
+  const b = $('btnGps'), t = $('gpsTxt');
+  if (!b || !t) return;
+  b.classList.remove('gps-ok','gps-wait','gps-err','gps-off');
+  const g = S.gps;
+  if (!S.cfg.gps){ b.classList.add('gps-off'); t.textContent = 'الموقع مقفول'; return; }
+  if (g.state === 'ok'){ b.classList.add('gps-ok'); t.textContent = '±' + Math.round(g.acc || 0) + ' م'; return; }
+  if (g.state === 'wait'){ b.classList.add('gps-wait'); t.textContent = 'بيحدد الموقع…'; return; }
+  if (g.state === 'err'){ b.classList.add('gps-err'); t.textContent = g.err || 'الموقع مش متاح'; return; }
+  b.classList.add('gps-off'); t.textContent = 'الموقع';
+}
+
+/* أي لوحة اتسجلت قبل ما ييجي أول تحديد، بنكمّل موقعها أول ما يوصل */
+function backfillLoc(){
+  const g = S.gps; let n = 0;
+  for (const r of S.session){
+    if (r.sess === S.sess && typeof r.lat !== 'number'){
+      r.lat = g.lat; r.lng = g.lng; r.acc = g.acc; r.gts = g.ts; n++;
+    }
+  }
+  for (const arr of [S.log, S.match]){
+    for (const r of arr){
+      if (r.sess === S.sess && typeof r.lat !== 'number'){ r.lat = g.lat; r.lng = g.lng; r.acc = g.acc; r.gts = g.ts; }
+    }
+  }
+  if (n){ Store.set(K.LOG, S.log); Store.set(K.MATCH, S.match); if (S.view === 'scan') renderScan(); }
+}
+
+function startGps(){
+  stopGps();
+  if (!S.cfg.gps){ S.gps.state = 'off'; gpsChip(); return; }
+  if (!navigator.geolocation){ S.gps.state = 'err'; S.gps.err = 'الجهاز مش بيدعم'; gpsChip(); return; }
+  S.gps = { lat:null, lng:null, acc:null, ts:0, state:'wait', err:'' };
+  gpsChip();
+  const opts = { enableHighAccuracy:true, maximumAge:0, timeout:20000 };
+  const onOk = (pos)=>{
+    S.gps.lat = pos.coords.latitude;
+    S.gps.lng = pos.coords.longitude;
+    S.gps.acc = pos.coords.accuracy;
+    S.gps.ts  = pos.timestamp || Date.now();
+    S.gps.state = 'ok'; S.gps.err = '';
+    gpsChip(); backfillLoc();
+  };
+  const onErr = (e)=>{
+    S.gps.state = 'err';
+    S.gps.err = (e && e.code === 1) ? 'الموقع مرفوض' : (e && e.code === 3) ? 'الإشارة ضعيفة' : 'الموقع مش متاح';
+    gpsChip();
+  };
+  try{
+    navigator.geolocation.getCurrentPosition(onOk, onErr, opts);
+    gpsWatch = navigator.geolocation.watchPosition(onOk, onErr, opts);
+  }catch(e){ onErr(null); }
+}
+function stopGps(){
+  if (gpsWatch != null){ try{ navigator.geolocation.clearWatch(gpsWatch); }catch(e){} gpsWatch = null; }
+}
+
+function setStatus(t){ const e = $('liveTxt'); if (e) e.textContent = t; }
+
+/* ---------------- مؤشر الصوت ---------------- */
+function setVol(p){
+  const v = Math.max(0, Math.min(100, Math.round(p)));
+  $('volFill').style.width = v + '%';
+  $('volPc').textContent = v + '%';
+}
+function attachAnalyser(stream){
+  try{
+    const C = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new C();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512; analyser.smoothingTimeConstant = .55;
+    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    const buf = new Uint8Array(analyser.fftSize);
+    let shown = 0;
+    const loop = ()=>{
+      if (!want){ setVol(0); return; }
+      analyser.getByteTimeDomainData(buf);
+      let sum = 0;
+      for (let i=0;i<buf.length;i++){ const d = (buf[i]-128)/128; sum += d*d; }
+      shown = shown*0.55 + Math.min(100, Math.sqrt(sum/buf.length)*470)*0.45;
+      setVol(shown);
+      volRAF = requestAnimationFrame(loop);
+    };
+    loop();
+    diag.mode = 'مؤشر صوت حقيقي';
+    return true;
+  }catch(e){ return false; }
+}
+function startFallbackMeter(){
+  fbMeter = true; fbLevel = 8;
+  clearInterval(fbTimer);
+  diag.mode = 'مؤشر نشاط الكلام';
+  fbTimer = setInterval(()=>{
+    if (!want){ clearInterval(fbTimer); setVol(0); return; }
+    fbLevel = Math.max(5, fbLevel*0.84 + (Math.random()*5 - 2.5));
+    setVol(fbLevel);
+  }, 120);
+}
+function fbPing(){ if (fbMeter) fbLevel = Math.min(99, 58 + Math.random()*41); }
+function stopMeter(){
+  cancelAnimationFrame(volRAF); clearInterval(fbTimer); fbMeter = false;
+  try{ micStream && micStream.getTracks().forEach(t=>t.stop()); }catch(e){}
+  try{ audioCtx && audioCtx.close(); }catch(e){}
+  micStream = null; audioCtx = null; analyser = null;
+  setVol(0);
+}
+
+/*
+  مهم على الموبايل: التعرّف على الكلام محتاج المايك لوحده.
+  لو فضلنا ماسكين getUserMedia الأندرويد بيدي التعرّف صوت فاضي ومفيش نتايج.
+  فبناخد الإذن وبس، وبعدين نسيب المايك للتعرّف ونستخدم مؤشر نشاط الكلام.
+*/
+async function primeMic(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    diag.gum = 'غير متاح (المتصفح أو الاتصال مش آمن)';
+    startFallbackMeter(); return false;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    diag.gum = 'تم';
+    if (IS_MOBILE){
+      stream.getTracks().forEach(t=>t.stop());
+      startFallbackMeter();
+    } else if (!attachAnalyser(stream)){
+      stream.getTracks().forEach(t=>t.stop());
+      startFallbackMeter();
+    } else {
+      micStream = stream;
+    }
+    return true;
+  }catch(e){
+    diag.gum = 'مرفوض: ' + (e && e.name ? e.name : 'خطأ');
+    startFallbackMeter();
+    return false;
+  }
+}
+async function readPerm(){
+  try{
+    if (navigator.permissions && navigator.permissions.query){
+      const st = await navigator.permissions.query({ name:'microphone' });
+      diag.perm = st.state === 'granted' ? 'مسموح' : st.state === 'denied' ? 'مرفوض' : 'هيسأل';
+    }
+  }catch(e){}
+}
+
+/* ---------------- التجميع ---------------- */
+function clearIdle(){ if (idleTimer){ clearTimeout(idleTimer); idleTimer = null; } }
+function armIdle(){
+  clearIdle();
+  idleTimer = setTimeout(()=>{
+    const L = PE.resolveLetters(pending.lt);
+    if (S.cfg.numMode){
+      if (pending.digits) setStatus('أرقام ناقصة (' + pending.digits + ') — لازم 4 أرقام');
+      pending = PE.newState();
+    } else if (L.length || pending.digits){
+      showDropped(L.slice(0,3), pending.digits.slice(0,4));
+      pending = PE.newState();
+    }
+    uttActive = false; uttText = '';
+  }, S.cfg.fast ? 900 : 2000);
+}
+
+/*
+  أندرويد بيبعت نتيجة نهائية بتكبر: "لوبي" ثم "لوبي كاف 3 4" ثم "لوبي كاف 3 4 5".
+  فبنتعامل مع الجملة كوحدة واحدة: كل ما النص يكبر نمسح صفوف الجملة ونعيد تحليلها
+  بالنص الكامل. كده مفيش تكرار، وكمان آخر الجملة بيصحّح أولها.
+*/
+/*
+  ترجيح قائمة المطلوب: محرك التعرّف بيرجّع أكتر من احتمال.
+  الاحتمال اللي بيطابق لوحة مطلوبة بياخد أفضلية كبيرة، لأن احتمال
+  إن عربية عشوائية أرقامها تطابق مطلوب = 1 في 10 آلاف.
+*/
+function wantedBonus(r){
+  if (!S.wanted.length) return 0;
+  let bonus = 0;
+  for (const p of r.plates){
+    if (!p.complete) continue;
+    const L = p.letters.join('');
+    if (L && findWanted(L, p.digits)) bonus += 420;      /* مطابقة تامة */
+    else if (findByDigits(p.digits).length) bonus += 160; /* الأرقام مطابقة */
+  }
+  return bonus;
+}
+
+function newUtterance(){
+  uttId++; uttActive = true;
+  baseState = PE.cloneState(pending);
+}
+
+/* اللوحة الناقصة ما تدخلش الجدول — بس نوضّحها للمستخدم */
+function droppedMsg(letters, digits){
+  const L = (letters||[]).join(' ') || '—';
+  const D = digits || '—';
+  return 'لوحة ناقصة (' + L + ' / ' + D + ') — لازم 3 حروف و4 أرقام. أعد النطق';
+}
+function showDropped(letters, digits){ setStatus(droppedMsg(letters, digits)); buzz(60); }
+
+function handleFinal(alts){
+  const primary = (alts[0] || '').trim();
+  if (!primary) return;
+
+  const np = PE.norm(primary), prev = PE.norm(uttText);
+  const gap = Date.now() - lastFinalAt;
+  let cont = false;
+  if (uttActive && prev){
+    if (gap < 4000 && (np.indexOf(prev) === 0 || prev.indexOf(np) === 0)) cont = true;
+    else if (gap < 2000){
+      /* أندرويد أحيانًا بيصحّح وسط الجملة، فبنقارن أول كلمتين */
+      const a = prev.split(' '), c = np.split(' ');
+      if (c.length >= a.length && a[0] === c[0] && (a.length < 2 || a[1] === c[1])) cont = true;
+    }
+  }
+  lastFinalAt = Date.now();
+
+  let candidates = alts;
+  if (cont){
+    if (np.length < prev.length) return;          /* نص أقصر من اللي عندنا: تجاهله */
+    if (removeUttRows(uttId) === false) { newUtterance(); }   /* فيه لوحة مطلوبة اتسجلت */
+    else candidates = [primary];
+  } else {
+    newUtterance();
+  }
+  uttText = primary;
+
+  /* تصفية الضوضاء: لو الكلام ده مش لوحة، نتجاهله خالص */
+  const q = PE.speechQuality(primary);
+  if (!q.ok){
+    uttActive = false; uttText = '';
+    return 'اتجاهل كلام مش لوحة — «' + primary.slice(0,40) + '»';
+  }
+
+  let best = null, bestScore = -1e9;
+  for (const a of candidates){
+    if (!a || !a.trim()) continue;
+    const r = S.cfg.numMode ? PE.parseDigits(a, baseState) : PE.parseChunk(applyLearn(a), baseState);
+    const sc = PE.scoreResult(r) + wantedBonus(r);
+    if (sc > bestScore){ bestScore = sc; best = r; }
+  }
+  if (!best) return;
+  let added = 0, lastAdd = null;
+  for (const p of best.plates){
+    if (!p.complete) continue;                 /* 3 حروف + 4 أرقام فقط */
+    addPlate(p.letters, p.digits, true, false, uttId, uttText);
+    lastAdd = p; added++;
+  }
+  pending = best.state;
+  armIdle();
+
+  if (added){
+    return '✓ ' + (lastAdd.letters.length ? lastAdd.letters.join(' ') + '  ' : 'أرقام ') + lastAdd.digits +
+           (added > 1 ? '  (+' + (added-1) + ')' : '');
+  }
+  if (best.dropped && best.dropped.length){
+    const d = best.dropped[best.dropped.length-1];
+    buzz(60);
+    return droppedMsg(d.letters, d.digits);
+  }
+  return null;
+}
+
+/* ---------------- التعرّف ---------------- */
+function startRec(){
+  if (!SRClass || starting) return;
+  starting = true;
+  try{
+    rec = new SRClass();
+    rec.lang = 'ar-EG';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 5;
+    procIdx = 0;
+
+    rec.onstart = ()=>{
+      starting = false; procIdx = 0; diag.starts++; lastStartAt = Date.now();
+      if (want) setStatus(S.cfg.numMode ? 'بيسمع… انطق الأرقام الأربعة بس' : 'بيسمع… انطق الحروف الأول وبعدين الأرقام');
+    };
+    rec.onaudiostart  = ()=>{ diag.lastErr = '—'; };
+    rec.onspeechstart = ()=>{ fbPing(); };
+
+    rec.onresult = (ev)=>{
+      diag.results++; backoff = 80;
+      clearTimeout(watchTimer);
+      let interim = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++){
+        const r = ev.results[i];
+        if (r.isFinal){
+          if (i < procIdx) continue;
+          procIdx = i + 1;
+          diag.finals++;
+          const alts = [];
+          for (let j=0;j<r.length;j++) alts.push(r[j].transcript);
+          diag.lastText = alts[0] || '';
+          clearIdle();
+          const msg = handleFinal(alts);
+          setStatus(msg || ('سمعت: ' + diag.lastText));
+        } else {
+          interim += r[0].transcript + ' ';
+        }
+      }
+      fbPing();
+      if (interim.trim()) setStatus('… ' + interim.trim());
+    };
+
+    rec.onerror = (e)=>{
+      const err = e.error || '';
+      diag.lastErr = err;
+      starting = false;
+      if (err === 'not-allowed' || err === 'service-not-allowed'){
+        want = false; alertPaused = false; updateMicUI(); stopMeter();
+        setStatus('المايك مرفوض — افتح إعدادات الموقع في المتصفح واسمح بالميكروفون');
+        toast('لازم تسمح باستخدام الميكروفون', 'err');
+        return;
+      }
+      if (err === 'audio-capture'){
+        stopMeter(); startFallbackMeter();
+        backoff = Math.min(6000, Math.max(backoff, 1500) * 2);
+        setStatus('المايك مشغول من تطبيق تاني — اقفله وجرّب تاني');
+        return;
+      }
+      if (err === 'network'){
+        setStatus('التعرّف على الكلام محتاج إنترنت — راجع الاتصال');
+        return;
+      }
+      if (err === 'no-speech'){ setStatus('مسمعتش صوت… قرّب المايك واتكلم'); return; }
+      if (err === 'language-not-supported'){
+        try{ rec.lang = 'ar-SA'; }catch(_){}
+        setStatus('اللهجة المصرية مش متاحة — تم التحويل للعربية');
+        return;
+      }
+      setStatus('حصل خطأ في الاستماع: ' + err);
+    };
+
+    rec.onend = ()=>{
+      starting = false;
+      if (!want) return;
+      /* لو الاستماع بيقفل فورًا، نزوّد وقت الانتظار عشان ما ندخلش في لفة سريعة */
+      const alive = Date.now() - lastStartAt;
+      if (alive < 600) backoff = Math.min(5000, Math.max(300, backoff * 2));
+      else backoff = 80;
+      clearTimeout(restartTimer);
+      restartTimer = setTimeout(()=>{ if (want) startRec(); }, backoff);
+    };
+
+    rec.start();
+
+    clearTimeout(watchTimer);
+    watchTimer = setTimeout(()=>{
+      if (want && diag.results === 0){
+        setStatus('لسه مجاش أي صوت — افتح «الإعدادات ← تشخيص المايك» لمعرفة السبب');
+      }
+    }, 10000);
+
+  }catch(e){
+    starting = false;
+    if (String(e && e.name) !== 'InvalidStateError'){
+      setStatus('تعذّر تشغيل الاستماع — اقفل الصفحة وافتحها تاني');
+    }
+  }
+}
+
+async function startSession(){
+  alertPaused = false;
+  if (!SRClass){
+    showModal(`<div class="mtag">${IC_BAD} المتصفح مش مدعوم</div>
+      <div class="mline">التعرّف على الكلام مش شغال في المتصفح ده.</div>
+      <div class="mline">افتح البرنامج من <b>Google Chrome</b> على أندرويد، أو Chrome / Edge على الكمبيوتر.</div>
+      <button class="close" data-close>تمام</button>`, 'alarm');
+    return;
+  }
+  if (!window.isSecureContext){
+    showModal(`<div class="mtag">${IC_BAD} الاتصال مش آمن</div>
+      <div class="mline">المايك مش هيشتغل غير لما تفتح البرنامج من رابط <b>https</b>.</div>
+      <div class="mline">ارفع الملفات على GitHub Pages وافتح اللينك بتاعه بدل ما تفتح الملف من التخزين.</div>
+      <button class="close" data-close>تمام</button>`, 'alarm');
+    return;
+  }
+  want = true;
+  pending = PE.newState();
+  updateMicUI();
+  setStatus(S.cfg.numMode ? 'بيسمع… انطق الأرقام الأربعة بس' : 'بيسمع… انطق اللوحة: 3 حروف و4 أرقام');
+  diag.results = 0; diag.finals = 0; backoff = 120;
+  uttActive = false; uttText = ''; baseState = PE.newState();
+
+  /* الاستماع يبدأ على طول. التعرّف نفسه بيطلب إذن المايك لوحده،
+     فمش محتاجين getUserMedia على الموبايل — وده كان بيأخّر البداية ويزاحم المايك. */
+  /* كل فتح للمايك = جلسة جديدة بنقطة موقع جديدة */
+  S.cfg.sessionNo = (S.cfg.sessionNo || 0) + 1;
+  S.sess = S.cfg.sessionNo;
+  Store.set(K.CFG, S.cfg);
+  startGps();
+
+  startRec();
+  if (IS_MOBILE){ diag.gum = 'مش مطلوب (التعرّف بياخد المايك)'; startFallbackMeter(); }
+  else primeMic();
+  readPerm();
+}
+
+function stopSession(){
+  want = false;
+  clearIdle(); clearTimeout(restartTimer); clearTimeout(watchTimer);
+  try{ rec && rec.stop(); }catch(e){}
+  const L = PE.resolveLetters(pending.lt);
+  if (L.length === 3 && pending.digits.length >= 4){
+    addPlate(L, pending.digits.slice(0,4), true);
+  }
+  pending = PE.newState();
+  uttActive = false; uttText = '';
+  stopMeter(); stopGps();
+  S.gps.state = 'off'; gpsChip();
+  updateMicUI();
+  setStatus('الجلسة وقفت. اضغط «بدء الجلسة الصوتية» عشان تكمل');
+}
+
+/* عند رصد لوحة مطلوبة: يوقف الاستماع لحد ما المستخدم يضغط استئناف */
+function pauseForWanted(){
+  if (!want) return;
+  want = false;
+  clearIdle(); clearTimeout(restartTimer); clearTimeout(watchTimer);
+  try{ rec && rec.stop(); }catch(e){}
+  pending = PE.newState();
+  uttActive = false; uttText = '';
+  stopMeter(); stopGps();
+  S.gps.state = 'off'; gpsChip();
+  alertPaused = true;
+  updateMicUI();
+  setStatus('الفحص متوقف — راجع بيانات اللوحة واضغط استئناف');
+}
+
+const SVG_MIC   = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></svg>';
+const SVG_TRI   = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.2M12 17h.01"/></svg>';
+const SVG_CHECK = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.2 5.2L20 6.6"/></svg>';
+const SVG_PLAY  = '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>';
+const SVG_STOP  = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg>';
+
+function updateMicUI(){
+  const bar = $('micBar');
+  bar.classList.toggle('live',  want);
+  bar.classList.toggle('alarm', !want && alertPaused);
+  if (alertPaused && !want){
+    $('micTitle').textContent = 'استئناف الفحص الصوتي';
+    $('micSub').textContent   = 'متوقف حتى تضغط استئناف';
+    $('btnMic').innerHTML  = SVG_TRI;
+    $('btnMic2').innerHTML = SVG_CHECK;
+  } else {
+    $('micTitle').textContent = want ? 'إيقاف الجلسة الصوتية' : 'بدء الجلسة الصوتية';
+    $('micSub').textContent   = want ? 'يستمع الآن' : 'جاهز للاستماع والتعبئة التلقائية';
+    $('btnMic').innerHTML  = SVG_MIC;
+    $('btnMic2').innerHTML = want ? SVG_STOP : SVG_PLAY;
+  }
+  S.listening = want;
+}
+
+function toggleSession(){
+  if (want){ alertPaused = false; stopSession(); }
+  else { alertPaused = false; startSession(); }
+}
+
+/* ================================================================
+   قراءة ملفات الإكسل (xlsx) و CSV بدون أي مكتبات خارجية
+   ================================================================ */
+async function inflateRaw(bytes){
+  if (typeof DecompressionStream === 'undefined') throw new Error('nozip');
+  const ds = new DecompressionStream('deflate-raw');
+  const stream = new Blob([bytes]).stream().pipeThrough(ds);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function unzip(u8){
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  let eocd = -1;
+  for (let i = u8.length - 22; i >= 0 && i > u8.length - 66000; i--){
+    if (dv.getUint32(i, true) === 0x06054b50){ eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('ملف غير صالح');
+  const count = dv.getUint16(eocd + 10, true);
+  let off = dv.getUint32(eocd + 16, true);
+  const out = {};
+  for (let n = 0; n < count; n++){
+    if (dv.getUint32(off, true) !== 0x02014b50) break;
+    const method = dv.getUint16(off + 10, true);
+    const cSize  = dv.getUint32(off + 20, true);
+    const nLen   = dv.getUint16(off + 28, true);
+    const xLen   = dv.getUint16(off + 30, true);
+    const cLen   = dv.getUint16(off + 32, true);
+    const lho    = dv.getUint32(off + 42, true);
+    const name   = new TextDecoder('utf-8').decode(u8.subarray(off + 46, off + 46 + nLen));
+    const lnLen  = dv.getUint16(lho + 26, true);
+    const lxLen  = dv.getUint16(lho + 28, true);
+    const dStart = lho + 30 + lnLen + lxLen;
+    const data   = u8.subarray(dStart, dStart + cSize);
+    if (/\.xml$/i.test(name) || /rels$/i.test(name)){
+      out[name] = (method === 0) ? data : await inflateRaw(data);
+    }
+    off += 46 + nLen + xLen + cLen;
+  }
+  return out;
+}
+function xmlDoc(bytes){
+  return new DOMParser().parseFromString(new TextDecoder('utf-8').decode(bytes), 'application/xml');
+}
+function colIdx(ref){
+  const m = /^([A-Z]+)/.exec(ref || ''); if (!m) return 0;
+  let n = 0; for (const ch of m[1]) n = n * 26 + (ch.charCodeAt(0) - 64);
+  return n - 1;
+}
+async function readXlsx(file){
+  const files = await unzip(new Uint8Array(await file.arrayBuffer()));
+  let shared = [];
+  if (files['xl/sharedStrings.xml']){
+    const d = xmlDoc(files['xl/sharedStrings.xml']);
+    shared = [...d.getElementsByTagName('si')].map(si =>
+      [...si.getElementsByTagName('t')].map(t => t.textContent).join(''));
+  }
+  const sheetNames = Object.keys(files)
+    .filter(k => /^xl\/worksheets\/sheet\d+\.xml$/i.test(k))
+    .sort((a,b)=> (parseInt(a.match(/(\d+)/)[1]) - parseInt(b.match(/(\d+)/)[1])));
+  if (!sheetNames.length) throw new Error('مفيش شيتات في الملف');
+  const rows = [];
+  const doc = xmlDoc(files[sheetNames[0]]);
+  for (const row of doc.getElementsByTagName('row')){
+    const arr = [];
+    for (const c of row.getElementsByTagName('c')){
+      const i = colIdx(c.getAttribute('r'));
+      const t = c.getAttribute('t');
+      let v = '';
+      if (t === 'inlineStr'){
+        v = [...c.getElementsByTagName('t')].map(x=>x.textContent).join('');
+      } else {
+        const vn = c.getElementsByTagName('v')[0];
+        v = vn ? vn.textContent : '';
+        if (t === 's') v = shared[parseInt(v,10)] ?? '';
+      }
+      arr[i] = String(v);
+    }
+    for (let i=0;i<arr.length;i++) if (arr[i]===undefined) arr[i]='';
+    if (arr.some(x => String(x).trim() !== '')) rows.push(arr);
+  }
+  return rows;
+}
+function parseCSV(text){
+  text = text.replace(/^\uFEFF/, '');
+  const first = (text.split(/\r?\n/)[0] || '');
+  const delim = (first.split(';').length > first.split(',').length) ? ';'
+              : (first.split('\t').length > first.split(',').length ? '\t' : ',');
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i=0;i<text.length;i++){
+    const ch = text[i];
+    if (q){
+      if (ch === '"'){ if (text[i+1] === '"'){ cell += '"'; i++; } else q = false; }
+      else cell += ch;
+    } else {
+      if (ch === '"') q = true;
+      else if (ch === delim){ row.push(cell); cell=''; }
+      else if (ch === '\n'){ row.push(cell); cell=''; if (row.some(x=>x.trim()!=='')) rows.push(row); row=[]; }
+      else if (ch !== '\r') cell += ch;
+    }
+  }
+  row.push(cell);
+  if (row.some(x=>x.trim()!=='')) rows.push(row);
+  return rows;
+}
+
+/* ---------- تحويل صفوف الملف إلى قائمة مطلوب ---------- */
+const H_PLATE = ['اللوحه','لوحه','رقم اللوحه','اللوحة','لوحة','رقم اللوحة','plate','platenumber','رقم لوحه','رقم المركبه','لوحة المركبة'];
+const H_LET   = ['الحروف','حروف','letters','حروف اللوحه','حروف اللوحة'];
+const H_NUM   = ['الارقام','ارقام','numbers','ارقام اللوحه','الأرقام'];
+const H_NAME  = ['البنك','الجهه','الجهة','المالك','الاسم','اسم','مطلوب لدي','bank','name','owner','جهه الطلب'];
+const H_TYPE  = ['النوع','نوع المركبه','نوع المركبة','type','model','الموديل','السياره','السيارة'];
+const H_VIN   = ['الشاسيه','رقم الشاسيه','رقم الشاسية','chassis','vin','الهيكل'];
+
+function hnorm(s){ return PE.norm(s).replace(/\s+/g,' ').trim(); }
+function findCol(header, list){
+  for (let i=0;i<header.length;i++){
+    const h = hnorm(header[i]).toLowerCase();
+    if (!h) continue;
+    for (const w of list){ if (h === hnorm(w).toLowerCase()) return i; }
+  }
+  for (let i=0;i<header.length;i++){
+    const h = hnorm(header[i]).toLowerCase();
+    if (!h) continue;
+    for (const w of list){ if (h.includes(hnorm(w).toLowerCase())) return i; }
+  }
+  return -1;
+}
+/* يفصل نص اللوحة إلى حروف + أرقام */
+function splitPlate(raw){
+  let s = PE.toWestDigits(String(raw||''))
+    .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u0640]/g,'')
+    .toUpperCase();
+  let letters = '', digits = '';
+  for (const ch of s){
+    if (/[0-9]/.test(ch)) digits += ch;
+    else if (/[\u0621-\u064A]/.test(ch)) letters += ch;
+    else if (PE.LAT2AR[ch]) letters += PE.LAT2AR[ch];
+  }
+  letters = PE.norm(letters).replace(/\s/g,'');
+  return { letters, digits };
+}
+function rowsToWanted(rows){
+  if (!rows.length) return { list:[], skipped:0 };
+  let header = rows[0].map(x=>String(x||''));
+  let hasHeader = false;
+  const probe = header.map(h=>hnorm(h).toLowerCase()).join('|');
+  for (const w of [...H_PLATE,...H_LET,...H_NAME,...H_VIN,...H_TYPE,...H_NUM]){
+    if (probe.includes(hnorm(w).toLowerCase())){ hasHeader = true; break; }
+  }
+  let iP=-1,iL=-1,iN=-1,iNm=-1,iT=-1,iV=-1;
+  if (hasHeader){
+    iP=findCol(header,H_PLATE); iL=findCol(header,H_LET); iN=findCol(header,H_NUM);
+    iNm=findCol(header,H_NAME); iT=findCol(header,H_TYPE); iV=findCol(header,H_VIN);
+  }
+  const body = hasHeader ? rows.slice(1) : rows;
+  const list = []; const seen = new Set(); let skipped = 0;
+
+  for (const r of body){
+    let letters='', digits='';
+    if (iL>=0 && iN>=0){
+      const a = splitPlate(r[iL]); const b = splitPlate(r[iN]);
+      letters = a.letters || b.letters; digits = b.digits || a.digits;
+    } else if (iP>=0){
+      const a = splitPlate(r[iP]); letters=a.letters; digits=a.digits;
+    } else {
+      /* بدون رؤوس: دوّر على أول خلية فيها حروف وأرقام */
+      for (const cell of r){
+        const a = splitPlate(cell);
+        if (a.letters.length>=2 && a.digits.length>=1){ letters=a.letters; digits=a.digits; break; }
+      }
+      if (!letters){
+        const a = splitPlate(r[0]||''), b = splitPlate(r[1]||'');
+        letters = a.letters; digits = a.digits || b.digits;
+      }
+    }
+    if (!letters || !digits){ skipped++; continue; }
+    letters = letters.slice(0,3);
+    digits  = digits.slice(-4);
+    const name = iNm>=0 ? String(r[iNm]||'').trim() : (findFree(r,[iP,iL,iN,iT,iV]) || '');
+    const type = iT>=0 ? String(r[iT]||'').trim() : '';
+    const vin  = iV>=0 ? String(r[iV]||'').trim() : '';
+    const key  = letters + '#' + (parseInt(digits,10)||0);
+    if (seen.has(key)) { continue; }
+    seen.add(key);
+    list.push({ L:letters, D:digits, key, name, type, vin });
+  }
+  return { list, skipped };
+}
+function findFree(row, used){
+  for (let i=0;i<row.length;i++){
+    if (used.includes(i)) continue;
+    const v = String(row[i]||'').trim();
+    if (v && !/^\d+$/.test(v) && v.length>2) return v;
+  }
+  return '';
+}
+
+/* ---------- التصدير ---------- */
+function download(name, content, mime){
+  const blob = new Blob([content], { type: mime || 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1200);
+}
+function toCSV(rows){
+  const q = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+  return '\uFEFF' + rows.map(r=>r.map(q).join(',')).join('\r\n');
+}
+function exportAll(){
+  const cutoff = Date.now() - 48*3600*1000;
+  const rows = [['اللوحة','الحروف','الأرقام','الحالة','الجهة','النوع','رقم الشاسية','التاريخ','رقم الجلسة','خط العرض','خط الطول','دقة الموقع (م)','رابط الخريطة']];
+  for (const r of S.log.filter(x=>x.t>=cutoff)){
+    rows.push([r.L+r.D, r.L.split('').join(' '), r.D, r.wanted?'مطلوبة':'سليمة', r.name||'', r.type||'', r.vin||'', fmtDate(r.t),
+               r.sess||'', hasLoc(r)?r.lat.toFixed(6):'', hasLoc(r)?r.lng.toFixed(6):'', r.acc?Math.round(r.acc):'', hasLoc(r)?mapsUrl(r):'']);
+  }
+  if (rows.length===1) return toast('السجل فاضي', 'err');
+  download('السجل_الشامل.csv', toCSV(rows));
+  toast('تم تنزيل السجل', 'ok');
+}
+function exportMatches(){
+  const rows = [['اللوحة','الحروف','الأرقام','الجهة','النوع','رقم الشاسية','التاريخ','رقم الجلسة','خط العرض','خط الطول','دقة الموقع (م)','رابط الخريطة']];
+  for (const r of S.match) rows.push([r.L+r.D, r.L.split('').join(' '), r.D, r.name||'', r.type||'', r.vin||'', fmtDate(r.t),
+               r.sess||'', hasLoc(r)?r.lat.toFixed(6):'', hasLoc(r)?r.lng.toFixed(6):'', r.acc?Math.round(r.acc):'', hasLoc(r)?mapsUrl(r):'']);
+  if (rows.length===1) return toast('مفيش مطابقات', 'err');
+  download('سجل_المطابقات.csv', toCSV(rows));
+  toast('تم تنزيل المطابقات', 'ok');
+}
+function exportTemplate(){
+  const rows = [['اللوحة','الجهة','النوع','رقم الشاسية'],
+                ['ربك2345','بنك الراجحي','Toyota Camry','JTNB14HK8R3250855'],
+                ['د ر ب 5451','أبو أحمد أشرف','Hyundai Elantra',''],
+                ['رال1512','','','']];
+  download('نموذج_اللوحات_المطلوبة.csv', toCSV(rows));
+  toast('نزّل النموذج، املاه، وارفعه تاني', 'ok');
+}
+
+/* ================================================================
+   شاشة ملف المطلوب
+   ================================================================ */
+function openFileSheet(){
+  showSheet(`
+    <h3>ملف اللوحات المطلوبة</h3>
+    <p class="sh-sub">ارفع ملف Excel أو CSV فيه اللوحات المطلوبة</p>
+    <div class="stat">
+      <div><b id="stW">${S.wanted.length}</b><span>لوحة مطلوبة</span></div>
+      <div><b id="stM">${S.match.length}</b><span>مطابقة</span></div>
+      <div><b>${S.log.length}</b><span>فحص مسجّل</span></div>
+    </div>
+    <button class="opt" id="optUp">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M12 18v-6M9.5 14.5L12 12l2.5 2.5"/></svg></span>
+      <span class="ot"><b>رفع ملف اللوحات المطلوبة</b><span>xlsx أو csv — هيستبدل القائمة الحالية</span></span>
+    </button>
+    <button class="opt green" id="optAdd">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+      <span class="ot"><b>إضافة ملف للقائمة الحالية</b><span>يضيف من غير ما يمسح اللي موجود</span></span>
+    </button>
+    <button class="opt gold" id="optTpl">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg></span>
+      <span class="ot"><b>تنزيل نموذج الملف</b><span>عمود اللوحة + الجهة + النوع + الشاسية</span></span>
+    </button>
+    <button class="opt danger" id="optClr">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></span>
+      <span class="ot"><b>مسح قائمة المطلوب</b><span>يمسح كل اللوحات المرفوعة</span></span>
+    </button>
+    ${S.wanted.length ? `
+      <h3 style="margin-top:18px">قائمة المطلوب</h3>
+      <p class="sh-sub">اضغط ✕ لحذف لوحة</p>
+      <input class="search" id="wSearch" placeholder="ابحث بالحروف أو الأرقام…" inputmode="search">
+      <div class="wlist" id="wlBox"></div>` : ''}
+  `);
+  $('optUp').addEventListener('click', ()=>pickFile(false));
+  $('optAdd').addEventListener('click', ()=>pickFile(true));
+  $('optTpl').addEventListener('click', exportTemplate);
+  $('optClr').addEventListener('click', clearWanted);
+  if (S.wanted.length){
+    const draw = (q)=>{
+      const term = PE.norm(q||'').replace(/\s/g,'');
+      const list = !term ? S.wanted : S.wanted.filter(w => (w.L+w.D).includes(term) || (w.name||'').includes(q));
+      $('wlBox').innerHTML = list.slice(0,400).map(w=>`
+        <div class="wl-item">
+          <span class="p">${w.L}${w.D}</span>
+          <span class="n">${esc(w.name||'—')}</span>
+          <button class="x" data-k="${esc(w.key)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>`).join('') || '<div style="padding:18px;text-align:center;color:var(--muted);font-size:13px">مفيش نتايج</div>';
+      $('wlBox').querySelectorAll('.x').forEach(b=>b.addEventListener('click', async ()=>{
+        S.wanted = S.wanted.filter(x=>x.key!==b.dataset.k);
+        rebuildWanted(); await Store.set(K.WANTED, S.wanted);
+        $('stW').textContent = S.wanted.length;
+        draw($('wSearch').value);
+      }));
+    };
+    draw('');
+    $('wSearch').addEventListener('input', e=>draw(e.target.value));
+  }
+}
+let addMode = false;
+function pickFile(add){ addMode = add; $('fileIn').value=''; $('fileIn').click(); }
+
+async function clearWanted(){
+  S.wanted = []; rebuildWanted();
+  await Store.set(K.WANTED, S.wanted);
+  closeOv(); render();
+  toast('اتمسحت قائمة المطلوب', 'ok');
+}
+
+async function onFile(e){
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  try{
+    let rows;
+    if (/\.(xlsx|xlsm)$/i.test(f.name)) rows = await readXlsx(f);
+    else rows = parseCSV(await f.text());
+
+    const { list, skipped } = rowsToWanted(rows);
+    if (!list.length){
+      showModal(`<div class="mtag">${IC_BAD} الملف مفيهوش لوحات</div>
+        <div class="mline">تأكد إن فيه عمود اسمه <b>اللوحة</b> (أو <b>الحروف</b> و<b>الأرقام</b>).</div>
+        <div class="mline">تقدر تنزّل النموذج الجاهز وتملاه.</div>
+        <button class="close" data-close>تمام</button>`,'alarm');
+      return;
+    }
+    if (addMode){
+      const have = new Set(S.wanted.map(w=>w.key));
+      for (const w of list) if (!have.has(w.key)){ S.wanted.push(w); have.add(w.key); }
+    } else {
+      S.wanted = list;
+    }
+    rebuildWanted();
+    await Store.set(K.WANTED, S.wanted);
+    scheduleSnapshot();
+    closeOv();
+    S.view = 'wanted'; render();
+    toast(`تم تحميل ${list.length} لوحة مطلوبة${skipped?` (${skipped} صف اتجاهل)`:''}`, 'ok');
+    recheckSession();
+  }catch(err){
+    const msg = String(err && err.message || err);
+    showModal(`<div class="mtag">${IC_BAD} مش عارف أقرا الملف</div>
+      <div class="mline">${msg==='nozip' ? 'المتصفح ده مش بيدعم فك ضغط xlsx — احفظ الملف بصيغة CSV وارفعه.' : 'جرّب تحفظ الملف بصيغة <b>xlsx</b> أو <b>CSV UTF-8</b> وارفعه تاني.'}</div>
+      <button class="close" data-close>تمام</button>`,'alarm');
+  }
+}
+/* بعد رفع ملف جديد: يراجع لوحات الجلسة الحالية */
+function recheckSession(){
+  let hits = 0;
+  for (const r of S.session){
+    if (!r.complete || r.wanted) continue;
+    const h = findWanted(r.L, r.D);
+    if (h){ r.wanted = true; r.name=h.name; r.type=h.type; r.vin=h.vin; S.match.push(r); hits++; }
+  }
+  if (hits){ Store.set(K.MATCH, S.match); render(); toast(`${hits} لوحة من الجلسة طلعت مطلوبة`, 'err'); beep(3); }
+}
+
+/* ================================================================
+   الإدخال اليدوي + الإعدادات
+   ================================================================ */
+function openManual(){
+  showSheet(`
+    <h3>إدخال لوحة يدويًا</h3>
+    <p class="sh-sub">3 حروف و4 أرقام</p>
+    <div class="manual-plate">
+      <input id="mL" maxlength="3" placeholder="ر ب ك" inputmode="text">
+      <input id="mD" class="num" maxlength="4" placeholder="2345" inputmode="numeric">
+    </div>
+    <button class="btn-main" id="mGo">فحص اللوحة</button>
+    <div class="kbd-help" style="margin-top:14px">
+      <b>طريقة النطق:</b> قول الحروف الأول وبعدين الأرقام —
+      «راء باء كاف اتنين تلاتة أربعة خمسة»<br>
+      <b>تقدر تقول:</b> «ره به كاف» أو «ر ب ك» أو الأرقام مزدوجة «أربعة وعشرين أربعة وعشرين»
+    </div>
+    <button class="opt danger" id="mClr" style="margin-top:6px">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></span>
+      <span class="ot"><b>تفريغ جدول الجلسة</b><span>السجل الشامل مش هيتمسح</span></span>
+    </button>
+  `);
+  const go = async ()=>{
+    const L = PE.norm($('mL').value).replace(/\s/g,'').slice(0,3);
+    const D = PE.toWestDigits($('mD').value).replace(/\D/g,'').slice(0,4);
+    if (L.length!==3 || D.length!==4) return toast('لازم 3 حروف و4 أرقام', 'err');
+    closeOv();
+    S.lastPlate=''; await addPlate(L.split(''), D, true);
+  };
+  $('mGo').addEventListener('click', go);
+  $('mD').addEventListener('keydown', e=>{ if(e.key==='Enter') go(); });
+  $('mClr').addEventListener('click', ()=>{ S.session=[]; closeOv(); renderScan(); toast('اتفرّغ جدول الجلسة','ok'); });
+  setTimeout(()=>{ const el = $('mL'); if (el) el.focus(); }, 260);
+}
+
+function openSettings(){
+  showSheet(`
+    <h3>الإعدادات</h3>
+    <p class="sh-sub">بيانات الدخول وتنبيهات البرنامج</p>
+    <div class="field"><label class="fl">اسم المستخدم</label><input class="fi" id="stU" value="${esc(S.cfg.user)}"></div>
+    <div class="field"><label class="fl">كلمة المرور</label><input class="fi" id="stP" value="${esc(S.cfg.pass)}"></div>
+    <button class="opt ${S.cfg.sound?'green':''}" id="stSnd">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></span>
+      <span class="ot"><b>صوت التنبيه عند لوحة مطلوبة</b><span>${S.cfg.sound?'مفعّل':'مقفول'}</span></span>
+    </button>
+    <button class="opt ${S.cfg.near!==false?'gold':''}" id="stNear">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6M11 8v3M11 14h.01"/></svg></span>
+      <span class="ot"><b>التصحيح بالقرب</b><span>${S.cfg.near!==false?'مفعّل':'مقفول'} — يسألك لو اللوحة قريبة من مطلوبة</span></span>
+    </button>
+    <button class="opt green" id="stLearn">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 10v5c0 1.7 2.2 3 5 3s5-1.3 5-3v-5"/></svg></span>
+      <span class="ot"><b>النطق المحفوظ</b><span>${Object.keys(S.cfg.learn||{}).length} نطق اتعلمه البرنامج — اضغط للمسح</span></span>
+    </button>
+    <button class="opt green" id="stBak">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M2 5h20v3H2zM10 12h4"/></svg></span>
+      <span class="ot"><b>النسخ الاحتياطي</b><span>${S.cfg.autoBackup!==false?'تلقائي مفعّل':'تلقائي مقفول'} — ${S.cfg.lastBackup?'آخر نسخة '+fmtDate(S.cfg.lastBackup):'لسه مفيش نسخة'}</span></span>
+    </button>
+    <button class="opt" id="stDiag">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2.5-6 4 13 2.5-7h6"/></svg></span>
+      <span class="ot"><b>تشخيص المايك</b><span>لو الصوت مش بيجيب نتايج، ابدأ من هنا</span></span>
+    </button>
+    <button class="opt gold" id="stLogo">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M4 18l5-5 4 4 3-2 4 3"/></svg></span>
+      <span class="ot"><b>شعار البرنامج</b><span>${S.cfg.logo ? 'اضغط لتغييره — أو امسحه' : 'ارفع صورة الشعار بتاعك'}</span></span>
+    </button>
+    ${S.cfg.logo ? `<button class="opt danger" id="stLogoDel"><span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span><span class="ot"><b>حذف الشعار</b><span>يرجع للشعار الافتراضي</span></span></button>` : ''}
+    <button class="opt gold" id="stLogo">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M4 17l5-5 4 4 2.5-2.5L20 17"/></svg></span>
+      <span class="ot"><b>شعار البرنامج</b><span>ارفع صورة الشعار بتاعك</span></span>
+    </button>
+    <button class="opt danger" id="stWipe">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg></span>
+      <span class="ot"><b>مسح السجل الشامل والمطابقات</b><span>قائمة المطلوب مش هتتمسح</span></span>
+    </button>
+    <button class="btn-main" id="stSave" style="margin-top:8px">حفظ</button>
+  `);
+  $('stSnd').addEventListener('click', async ()=>{ S.cfg.sound=!S.cfg.sound; await Store.set(K.CFG,S.cfg); openSettings(); });
+  $('stLogo').addEventListener('click', ()=>{ $('imgIn').value=''; $('imgIn').click(); });
+  $('stDiag').addEventListener('click', openDiag);
+  $('stBak').addEventListener('click', openBackup);
+  $('stNear').addEventListener('click', async ()=>{
+    S.cfg.near = (S.cfg.near === false);
+    await Store.set(K.CFG, S.cfg); openSettings();
+  });
+  $('stLearn').addEventListener('click', async ()=>{
+    S.cfg.learn = {}; await Store.set(K.CFG, S.cfg); openSettings(); toast('اتمسح النطق المحفوظ','ok');
+  });
+  $('stLogo').addEventListener('click', ()=>{ $('logoIn').value=''; $('logoIn').click(); });
+  const dl = $('stLogoDel');
+  if (dl) dl.addEventListener('click', async ()=>{ S.cfg.logo=''; await Store.set(K.CFG,S.cfg); applyLogo(); openSettings(); toast('رجع الشعار الافتراضي','ok'); });
+  $('stWipe').addEventListener('click', async ()=>{
+    S.log=[]; S.match=[];
+    await Store.set(K.LOG,S.log); await Store.set(K.MATCH,S.match);
+    closeOv(); render(); toast('اتمسح السجل','ok');
+  });
+  $('stSave').addEventListener('click', async ()=>{
+    const u=$('stU').value.trim(), p=$('stP').value.trim();
+    if (!u||!p) return toast('املا الاسم وكلمة المرور','err');
+    S.cfg.user=u; S.cfg.pass=p; await Store.set(K.CFG,S.cfg);
+    closeOv(); toast('اتحفظت الإعدادات','ok');
+  });
+}
+
+/* ---------- شعار البرنامج ---------- */
+const DEFAULT_MARK = document.getElementById('lgMark') ? document.getElementById('lgMark').innerHTML : '';
+function applyLogo(){
+  const el = $('lgMark'); if (!el) return;
+  if (S.cfg.logo) el.innerHTML = `<img src="${S.cfg.logo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px">`;
+  else el.innerHTML = DEFAULT_MARK;
+}
+async function onLogo(e){
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  if (f.size > 1.6*1024*1024) return toast('الصورة كبيرة — استخدم صورة أصغر من 1.5 ميجا','err');
+  const fr = new FileReader();
+  fr.onload = async ()=>{
+    S.cfg.logo = fr.result;
+    await Store.set(K.CFG, S.cfg);
+    applyLogo(); closeOv(); toast('اتغيّر الشعار','ok');
+  };
+  fr.readAsDataURL(f);
+}
+
+/* ---------- شعار البرنامج ---------- */
+function applyLogo(){
+  const box = $('lgMark'); if (!box) return;
+  if (S.cfg.logo){
+    box.innerHTML = `<img src="${S.cfg.logo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px">`;
+    box.style.padding = '0';
+  }
+}
+async function onLogoFile(e){
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  if (f.size > 900*1024) return toast('الصورة كبيرة — اختار صورة أصغر من 900 كيلوبايت', 'err');
+  const fr = new FileReader();
+  fr.onload = async ()=>{
+    S.cfg.logo = String(fr.result);
+    await Store.set(K.CFG, S.cfg);
+    applyLogo(); closeOv(); toast('اتغيّر الشعار', 'ok');
+  };
+  fr.readAsDataURL(f);
+}
+
+/* ---------- تشخيص المايك ---------- */
+function openDiag(){
+  const yes = v => v ? '✅ ' : '⛔ ';
+  const chrome = /Chrome|CriOS|Edg/i.test(navigator.userAgent) && !/OPR|SamsungBrowser|UCBrowser|MiuiBrowser/i.test(navigator.userAgent);
+  const rows = [
+    ['نسخة البرنامج', APP_VERSION],
+    ['تسجيل الموقع', S.cfg.gps ? (S.gps.state==='ok' ? '✅ شغال (±'+Math.round(S.gps.acc||0)+' م)' : S.gps.state==='err' ? '⛔ '+S.gps.err : 'مفعّل') : 'مقفول'],
+    ['رقم الجلسة الحالية', String(S.sess || 0)],
+    ['المتصفح يدعم التعرّف', yes(diag.support) + (diag.support ? 'مدعوم' : 'غير مدعوم')],
+    ['متصفح مناسب', yes(chrome) + (chrome ? 'Chrome / Edge' : 'استخدم Chrome')],
+    ['اتصال آمن (https)', yes(diag.secure) + diag.proto],
+    ['إذن الميكروفون', diag.perm],
+    ['فتح المايك', diag.gum],
+    ['مؤشر الصوت', diag.mode],
+    ['مرات تشغيل الاستماع', String(diag.starts)],
+    ['نتائج وصلت', String(diag.results) + ' (نهائية: ' + diag.finals + ')'],
+    ['آخر خطأ', diag.lastErr],
+    ['آخر نص مسموع', diag.lastText]
+  ];
+  let advice = '';
+  if (!diag.support) advice = 'المتصفح ده مش بيدعم التعرّف على الكلام. حمّل Google Chrome واشتغل عليه.';
+  else if (!diag.secure) advice = 'لازم تفتح البرنامج من رابط https. ارفعه على GitHub Pages وافتح اللينك، مش من الملف المحفوظ.';
+  else if (/مرفوض/.test(diag.gum) || diag.perm === 'مرفوض' || diag.lastErr === 'not-allowed')
+    advice = 'الميكروفون مرفوض. من كروم: اضغط القفل جنب اللينك ← أذونات الموقع ← الميكروفون ← سماح، وبعدين اعمل تحديث للصفحة.';
+  else if (diag.lastErr === 'network') advice = 'التعرّف على الكلام بيشتغل بالإنترنت. افتح الداتا أو الواي فاي وجرّب تاني.';
+  else if (diag.lastErr === 'audio-capture') advice = 'المايك ماسكه تطبيق تاني (مكالمة أو مسجل). اقفله وجرّب تاني.';
+  else if (diag.starts > 0 && diag.results === 0) advice = 'الاستماع اشتغل بس مجاش صوت. جرّب تقرّب المايك، وارفع صوتك، واتأكد إن مايك الموبايل مش متغطي.';
+  else if (diag.finals > 0) advice = 'الصوت شغال تمام. لو اللوحات مش بتتسجل، قول الحروف الأول وبعدين الأرقام، ومتسكتش وسط اللوحة.';
+
+  showSheet(`
+    <h3>تشخيص المايك</h3>
+    <p class="sh-sub">شغّل الجلسة الصوتية واتكلم، وبعدين افتح الشاشة دي</p>
+    ${advice ? `<div class="kbd-help" style="border:1.5px solid var(--gold);background:var(--gold-bg)"><b>الحل:</b> ${esc(advice)}</div>` : ''}
+    <div class="wlist">
+      ${rows.map(r=>`<div class="wl-item"><span class="n" style="text-align:right;flex:0 0 45%;color:var(--muted)">${esc(r[0])}</span><span class="n" style="text-align:left;color:var(--ink)">${esc(r[1])}</span></div>`).join('')}
+    </div>
+    <div class="kbd-help" style="margin-top:12px">
+      <b>ملاحظة:</b> التعرّف على الكلام بيعتمد على خدمة جوجل، فمحتاج <b>إنترنت</b> و<b>https</b>.
+      على الأندرويد بنسيب المايك للتعرّف لوحده، فمؤشر «الصوت» بيتحرك مع الكلام مش مع مستوى الصوت الحقيقي.
+    </div>
+    <button class="btn-main" id="dgCopy" style="margin-top:10px">نسخ تقرير التشخيص</button>
+  `);
+  $('dgCopy').addEventListener('click', async ()=>{
+    const txt = rows.map(r=>r[0]+': '+r[1]).join('\n') + '\nUA: ' + navigator.userAgent;
+    try{ await navigator.clipboard.writeText(txt); toast('اتنسخ التقرير','ok'); }
+    catch(e){ toast('مش قادر أنسخ — صوّر الشاشة','err'); }
+  });
+}
+
+/* ================================================================
+   الخريطة الحية
+   ================================================================ */
+let mapObj = null, mapLayer = null, liveMk = null, liveCircle = null;
+let mapFilter = 'today', mapFollow = true, mapLoading = false, mapFail = false;
+
+function loadLeaflet(){
+  if (window.L) return Promise.resolve(window.L);
+  if (mapFail) return Promise.reject(new Error('offline'));
+  return new Promise((res, rej)=>{
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(css);
+    const js = document.createElement('script');
+    js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    js.onload  = ()=> window.L ? res(window.L) : rej(new Error('offline'));
+    js.onerror = ()=>{ mapFail = true; rej(new Error('offline')); };
+    document.head.appendChild(js);
+    setTimeout(()=>{ if (!window.L){ mapFail = true; rej(new Error('offline')); } }, 9000);
+  });
+}
+
+function haversine(a, b){
+  const R = 6371, rad = Math.PI/180;
+  const dLat = (b.lat-a.lat)*rad, dLng = (b.lng-a.lng)*rad;
+  const s = Math.sin(dLat/2)**2 + Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.min(1, Math.sqrt(s)));
+}
+
+/* اللوحات اللي ليها إحداثيات حسب الفلتر */
+function mapPoints(){
+  const now = Date.now();
+  let from = now - 48*3600*1000;
+  if (mapFilter === 'today'){
+    const d = new Date(); d.setHours(0,0,0,0); from = d.getTime();
+  }
+  let rows = S.log.filter(r => hasLoc(r) && r.t >= from);
+  if (mapFilter === 'sess') rows = rows.filter(r => r.sess === S.sess && S.sess);
+  return rows.sort((a,b)=> a.t - b.t);
+}
+
+function mapStats(rows){
+  const w = rows.filter(r=>r.wanted).length;
+  let km = 0;
+  const bySess = {};
+  for (const r of rows){ (bySess[r.sess||0] = bySess[r.sess||0] || []).push(r); }
+  for (const k in bySess){
+    const arr = bySess[k];
+    for (let i=1;i<arr.length;i++) km += haversine(arr[i-1], arr[i]);
+  }
+  $('msN').textContent  = rows.length;
+  $('msW').textContent  = w;
+  $('msKm').textContent = km < 10 ? km.toFixed(1) : Math.round(km);
+  return bySess;
+}
+
+function mapEmpty(msg){
+  $('mapBox').innerHTML = `<div class="map-empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6.4v14L9 18l6 2.4 6-2.4v-14L15 6.4z"/><path d="M9 4v14M15 6.4v14"/></svg>
+    ${msg}</div>`;
+  mapObj = null;
+}
+
+async function renderMap(){
+  document.querySelectorAll('.map-tools .mchip[data-f]').forEach(b=>
+    b.classList.toggle('on', b.dataset.f === mapFilter));
+  const fb = $('btnFollow'); if (fb) fb.classList.toggle('on', mapFollow);
+
+  const rows = mapPoints();
+  const bySess = mapStats(rows);
+
+  if (!rows.length && !(S.listening && S.gps.state === 'ok')){
+    mapEmpty('مفيش نقط مسجّلة في الفترة دي.<br>شغّل الجلسة الصوتية وخلّي الموقع مفتوح،<br>وكل لوحة هتنطقها هتظهر هنا.');
+    return;
+  }
+
+  let L;
+  try { L = await loadLeaflet(); }
+  catch(e){ drawCanvasMap(rows, bySess); return; }
+
+  if (!mapObj){
+    $('mapBox').innerHTML = '';
+    mapObj = L.map($('mapBox'), { zoomControl:true, attributionControl:true });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(mapObj);
+    mapLayer = L.layerGroup().addTo(mapObj);
+    mapObj.on('dragstart', ()=>{ mapFollow = false; const b=$('btnFollow'); if(b) b.classList.remove('on'); });
+    mapObj.setView([24.7136, 46.6753], 12);
+  }
+  setTimeout(()=>{ try{ mapObj.invalidateSize(); }catch(e){} }, 60);
+
+  mapLayer.clearLayers();
+  const bounds = [];
+
+  /* المسار لكل جلسة */
+  for (const k in bySess){
+    const pts = bySess[k].map(r=>[r.lat, r.lng]);
+    if (pts.length > 1) L.polyline(pts, { color:'#1668d6', weight:3, opacity:.55, dashArray:'6 5' }).addTo(mapLayer);
+  }
+
+  /* النقط */
+  for (const r of rows){
+    bounds.push([r.lat, r.lng]);
+    const when = fmtDate(r.t);
+    const plate = (r.L ? r.L + ' ' : '') + r.D;
+    const html = `<b>${esc(plate)}</b><br>${r.wanted ? '⚠ مطلوبة' : '✓ سليمة'}` +
+                 (r.wanted && r.name ? `<br>الجهة: ${esc(r.name)}` : '') +
+                 `<br>${esc(when)}` + (r.acc ? `<br>دقة ±${Math.round(r.acc)} م` : '') +
+                 `<br><a href="${mapsUrl(r)}" target="_blank" rel="noopener">فتح في خرائط جوجل</a>`;
+    if (r.wanted){
+      L.marker([r.lat, r.lng], {
+        icon: L.divIcon({ className:'', html:'<div class="mk-w"></div>', iconSize:[22,22], iconAnchor:[11,11] })
+      }).addTo(mapLayer).bindPopup(html);
+    } else {
+      L.circleMarker([r.lat, r.lng], {
+        radius:6, color:'#0d7a44', weight:2, fillColor:'#2fbe7c', fillOpacity:.9
+      }).addTo(mapLayer).bindPopup(html);
+    }
+  }
+
+  /* مكانك الحالي */
+  const g = S.gps;
+  if (S.listening && g.state === 'ok' && typeof g.lat === 'number'){
+    liveMk = L.marker([g.lat, g.lng], {
+      icon: L.divIcon({ className:'', html:'<div class="mk-live"></div>', iconSize:[16,16], iconAnchor:[8,8] })
+    }).addTo(mapLayer).bindPopup('مكانك دلوقتي');
+    if (g.acc) L.circle([g.lat, g.lng], { radius:g.acc, color:'#1668d6', weight:1, fillOpacity:.08 }).addTo(mapLayer);
+    bounds.push([g.lat, g.lng]);
+    if (mapFollow) mapObj.setView([g.lat, g.lng], Math.max(mapObj.getZoom(), 16));
+  }
+
+  if (!mapFollow && bounds.length){
+    try{ mapObj.fitBounds(bounds, { padding:[36,36], maxZoom:17 }); }catch(e){}
+  } else if (mapFollow && !liveMk && bounds.length){
+    try{ mapObj.fitBounds(bounds, { padding:[36,36], maxZoom:17 }); }catch(e){}
+  }
+}
+
+/* تحديث المؤشر الحي أثناء الجلسة */
+function mapLiveTick(){
+  if (S.view === 'map' && mapObj) renderMap();
+}
+
+function exportMapPoints(){
+  const rows = mapPoints();
+  if (!rows.length) return toast('مفيش نقط في الفترة دي', 'err');
+  const out = [['اللوحة','الحالة','الجهة','التاريخ','رقم الجلسة','خط العرض','خط الطول','دقة (م)','رابط الخريطة']];
+  for (const r of rows){
+    out.push([(r.L||'') + r.D, r.wanted?'مطلوبة':'سليمة', r.name||'', fmtDate(r.t),
+              r.sess||'', r.lat.toFixed(6), r.lng.toFixed(6), r.acc?Math.round(r.acc):'', mapsUrl(r)]);
+  }
+  download('نقاط_الخريطة.csv', toCSV(out));
+  toast('تم تنزيل نقاط الخريطة', 'ok');
+}
+
+
+/* ================================================================
+   خريطة احتياطية بترسم من غير إنترنت (لو صور الشوارع مش متاحة)
+   ================================================================ */
+function drawCanvasMap(rows, bySess){
+  const box = $('mapBox');
+  const g = S.gps;
+  const live = (S.listening && g.state === 'ok' && typeof g.lat === 'number') ? g : null;
+  const all = rows.map(r=>({lat:r.lat, lng:r.lng})).concat(live ? [{lat:live.lat, lng:live.lng}] : []);
+  if (!all.length){
+    mapEmpty('مفيش نقط مسجّلة في الفترة دي.');
+    return;
+  }
+
+  mapObj = null;
+  box.innerHTML = '<canvas id="mapCv" style="width:100%;height:100%;display:block;touch-action:none"></canvas>' +
+    '<div id="mapTip" style="position:absolute;inset-inline-start:10px;top:10px;background:var(--card);border:1px solid var(--line);' +
+    'border-radius:10px;padding:7px 11px;font-size:12px;font-weight:700;box-shadow:var(--shadow);max-width:78%;line-height:1.7;z-index:2">' +
+    'رسم بدون إنترنت — دوس على أي نقطة تشوف بياناتها</div>';
+
+  const cv = $('mapCv');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = box.clientWidth, H = box.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const ctx = cv.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  let minLat = Math.min(...all.map(p=>p.lat)), maxLat = Math.max(...all.map(p=>p.lat));
+  let minLng = Math.min(...all.map(p=>p.lng)), maxLng = Math.max(...all.map(p=>p.lng));
+  const padLat = Math.max((maxLat-minLat)*0.15, 0.0008);
+  const padLng = Math.max((maxLng-minLng)*0.15, 0.0008);
+  minLat -= padLat; maxLat += padLat; minLng -= padLng; maxLng += padLng;
+
+  const M = 34;
+  const kx = (W - M*2) / (maxLng - minLng);
+  const ky = (H - M*2) / (maxLat - minLat);
+  const k  = Math.min(kx, ky);
+  const cxOff = (W - (maxLng-minLng)*k) / 2;
+  const cyOff = (H - (maxLat-minLat)*k) / 2;
+  const X = lng => cxOff + (lng - minLng) * k;
+  const Y = lat => H - cyOff - (lat - minLat) * k;
+
+  const css = getComputedStyle(document.documentElement);
+  const cLine = css.getPropertyValue('--line').trim() || '#d8e2f0';
+  const cBg   = css.getPropertyValue('--line2').trim() || '#eef3fb';
+  const cInk  = css.getPropertyValue('--muted').trim() || '#5b7392';
+
+  ctx.fillStyle = cBg; ctx.fillRect(0,0,W,H);
+
+  /* شبكة */
+  ctx.strokeStyle = cLine; ctx.lineWidth = 1;
+  for (let i=0;i<=6;i++){
+    const x = M + i*((W-M*2)/6), y = M + i*((H-M*2)/6);
+    ctx.beginPath(); ctx.moveTo(x, M); ctx.lineTo(x, H-M); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(M, y); ctx.lineTo(W-M, y); ctx.stroke();
+  }
+
+  /* المسارات */
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(22,104,214,.55)'; ctx.setLineDash([6,5]);
+  for (const key in bySess){
+    const arr = bySess[key];
+    if (arr.length < 2) continue;
+    ctx.beginPath();
+    arr.forEach((r,i)=> i ? ctx.lineTo(X(r.lng), Y(r.lat)) : ctx.moveTo(X(r.lng), Y(r.lat)));
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  /* النقط */
+  const hit = [];
+  for (const r of rows){
+    const x = X(r.lng), y = Y(r.lat);
+    hit.push({x, y, r});
+    if (r.wanted){
+      ctx.beginPath(); ctx.arc(x,y,15,0,7); ctx.fillStyle='rgba(212,17,31,.18)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y,9,0,7);
+      ctx.fillStyle='#d4111f'; ctx.fill();
+      ctx.lineWidth=3; ctx.strokeStyle='#fff'; ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(x,y,6,0,7);
+      ctx.fillStyle='#2fbe7c'; ctx.fill();
+      ctx.lineWidth=2; ctx.strokeStyle='#0d7a44'; ctx.stroke();
+    }
+  }
+
+  /* مكانك */
+  if (live){
+    const x = X(live.lng), y = Y(live.lat);
+    ctx.beginPath(); ctx.arc(x,y,17,0,7); ctx.fillStyle='rgba(22,104,214,.18)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,8,0,7); ctx.fillStyle='#1668d6'; ctx.fill();
+    ctx.lineWidth=3; ctx.strokeStyle='#fff'; ctx.stroke();
+  }
+
+  /* مقياس المسافة */
+  const midLat = (minLat+maxLat)/2;
+  const mPerPx = haversine({lat:midLat,lng:minLng},{lat:midLat,lng:maxLng})*1000 / ((maxLng-minLng)*k);
+  const targets = [50,100,200,500,1000,2000,5000];
+  let barM = targets.find(t => t/mPerPx > 60) || 5000;
+  const barPx = barM / mPerPx;
+  ctx.strokeStyle = cInk; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(W-M-barPx, H-16); ctx.lineTo(W-M, H-16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W-M-barPx, H-21); ctx.lineTo(W-M-barPx, H-11); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W-M, H-21); ctx.lineTo(W-M, H-11); ctx.stroke();
+  ctx.fillStyle = cInk; ctx.font = '600 12px Cairo, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(barM >= 1000 ? (barM/1000)+' كم' : barM+' م', W-M-barPx/2, H-24);
+
+  cv.onclick = (ev)=>{
+    const b = cv.getBoundingClientRect();
+    const mx = ev.clientX - b.left, my = ev.clientY - b.top;
+    let best = null, bd = 26;
+    for (const h of hit){
+      const d = Math.hypot(h.x-mx, h.y-my);
+      if (d < bd){ bd = d; best = h.r; }
+    }
+    if (best) showPointInfo(best);
+  };
+}
+
+function showPointInfo(r){
+  showModal(`
+    <div class="mp">${(r.L||'').split('').join(' ')} ${(r.D||'').split('').join(' ')}</div>
+    <div class="mline">الحالة: <i>${r.wanted?'مطلوبة':'سليمة'}</i></div>
+    <div class="mline">الوقت: <i>${fmtDate(r.t)}</i></div>
+    <div class="mline">الموقع: <i>${esc(locText(r))}</i></div>
+    <a class="map-btn" href="${mapsUrl(r)}" target="_blank" rel="noopener">${IC_PIN} فتح الموقع في الخرائط</a>
+    <button class="close" data-close>إغلاق</button>`);
+}
+
+/* ================================================================
+   التدريب الصوتي — يبني قاموس نطقك في دقايق
+   ================================================================ */
+const TRAIN_LETTERS = ['ا','ب','ح','د','ر','س','ص','ط','ع','ق','ك','ل','م','ن','ه','و','ي'];
+let trn = null;   /* { list, i, rec, want, results } */
+
+function makeTrainList(n){
+  const out = [];
+  const used = new Set();
+  /* نوزّع الحروف عشان كل حرف يتجرّب مرة على الأقل */
+  const pool = [];
+  for (let k=0;k<3;k++) pool.push(...TRAIN_LETTERS);
+  for (let i=pool.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  let pi = 0;
+  while (out.length < n){
+    const L = [pool[pi++ % pool.length], pool[pi++ % pool.length], pool[pi++ % pool.length]];
+    const D = String(Math.floor(Math.random()*9000)+1000);
+    const key = L.join('')+D;
+    if (used.has(key)) continue;
+    used.add(key);
+    out.push({ L, D });
+  }
+  return out;
+}
+
+function trainStop(){
+  if (!trn) return;
+  trn.want = false;
+  try{ trn.rec && trn.rec.stop(); }catch(e){}
+  trn.rec = null;
+}
+
+function openTrain(){
+  if (!SRClass){
+    showModal(`<div class="mtag">${IC_BAD} المتصفح مش مدعوم</div>
+      <div class="mline">التدريب محتاج التعرّف على الكلام. افتح البرنامج من Google Chrome.</div>
+      <button class="close" data-close>تمام</button>`,'alarm');
+    return;
+  }
+  if (S.listening) stopSession();
+  trn = { list: makeTrainList(20), i: 0, rec: null, want: false, results: [], tries: 0 };
+  trainRender();
+}
+
+function trainRender(){
+  const t = trn; if (!t) return;
+  if (t.i >= t.list.length) return trainDone();
+  const cur = t.list[t.i];
+  const pct = Math.round((t.i / t.list.length) * 100);
+
+  const done = t.results[t.i];
+  showSheet(`
+    <h3>تدريب النطق</h3>
+    <p class="sh-sub">انطق اللوحة اللي قدامك، والبرنامج هيتعلم صوتك</p>
+
+    <div class="trn-bar"><div class="trn-fill" style="width:${pct}%"></div></div>
+    <div class="trn-count">${t.i + 1} من ${t.list.length}${t.tries ? ' — محاولة ' + (t.tries+1) : ''}</div>
+
+    <div class="trn-plate">
+      <div class="trn-letters">${cur.L.join(' ')}</div>
+      <div class="trn-digits">${cur.D}</div>
+    </div>
+
+    <div class="trn-status" id="trnStatus">${done ? esc(done.msg||'') : 'اضغط «انطق» وقول اللوحة دي'}</div>
+
+    <button class="btn-main" id="trnGo">${t.tries ? 'انطق تاني' : 'انطق'}</button>
+    <div id="trnActions"></div>
+    <div class="kbd-help" style="margin-top:12px">
+      قول الحروف الأول وبعدين الأرقام في نَفَس واحد.
+      لو سمعها غلط، اضغط <b>إعادة</b> وكرّرها لحد ما تطلع صح — كل محاولة بيتعلم منها.
+    </div>
+  `);
+  if (done) $('trnStatus').className = 'trn-status ' + (done.okL && done.okD ? 'ok' : 'warn');
+  trainActions();
+  $('trnGo').addEventListener('click', trainListen);
+}
+
+/* أزرار: إعادة / التالي / إنهاء */
+function trainActions(){
+  const t = trn; if (!t) return;
+  const box = $('trnActions'); if (!box) return;
+  const done = t.results[t.i];
+  const IC_REDO = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
+  box.className = 'dt-actions';
+  box.innerHTML =
+    `<button class="dt-no" id="trnRedo" ${t.tries||done?'':'style="opacity:.5"'}>${IC_REDO} إعادة</button>` +
+    `<button class="dt-no" id="trnNext">${done ? 'التالي ›' : 'تخطّي'}</button>` +
+    `<button class="dt-no" id="trnEnd">إنهاء</button>`;
+  $('trnRedo').addEventListener('click', ()=>{ trainStop(); trainListen(); });
+  $('trnNext').addEventListener('click', ()=>{ trainStop(); t.i++; t.tries = 0; trainRender(); });
+  $('trnEnd').addEventListener('click', ()=>{ trainStop(); (t.results.filter(Boolean).length ? trainDone() : closeOv()); });
+}
+
+function trainListen(){
+  const t = trn; if (!t) return;
+  const cur = t.list[t.i];
+  const st = $('trnStatus');
+  st.textContent = 'بيسمع… انطق دلوقتي';
+  st.className = 'trn-status live';
+  $('trnGo').textContent = 'بيسمع…';
+
+  trainStop();
+  t.want = true;
+  let heard = '', done = false;
+
+  const finish = ()=>{
+    if (done) return; done = true;
+    t.want = false;
+    try{ t.rec && t.rec.stop(); }catch(e){}
+    trainJudge(cur, heard);
+  };
+
+  try{
+    const r = new SRClass();
+    t.rec = r;
+    r.lang = 'ar-EG'; r.continuous = false; r.interimResults = true; r.maxAlternatives = 5;
+    r.onresult = (ev)=>{
+      let alts = [];
+      for (let i = ev.resultIndex; i < ev.results.length; i++){
+        const res = ev.results[i];
+        if (res.isFinal){
+          for (let j=0;j<res.length;j++) alts.push(res[j].transcript);
+          heard = alts[0] || heard;
+          t.lastAlts = alts;
+        } else {
+          st.textContent = '… ' + res[0].transcript;
+        }
+      }
+      if (heard) setTimeout(finish, 250);
+    };
+    r.onerror = (e)=>{
+      st.textContent = e.error === 'no-speech' ? 'مسمعتش صوت — جرّب تاني' : 'خطأ: ' + e.error;
+      st.className = 'trn-status bad';
+      $('trnGo').textContent = 'انطق تاني';
+      t.want = false;
+    };
+    r.onend = ()=>{ if (t.want && heard) finish(); else if (t.want){ t.want = false; $('trnGo').textContent = 'انطق تاني'; } };
+    r.start();
+    setTimeout(()=>{ if (t.want) finish(); }, 9000);
+  }catch(e){
+    st.textContent = 'تعذّر تشغيل الاستماع';
+    st.className = 'trn-status bad';
+  }
+}
+
+function trainJudge(cur, heard){
+  const st = $('trnStatus'); if (!st) return;
+  const target = cur.L.join('');
+
+  if (!heard || !heard.trim()){
+    st.textContent = 'مسمعتش حاجة — جرّب تاني';
+    st.className = 'trn-status bad';
+    $('trnGo').textContent = 'انطق تاني';
+    return;
+  }
+
+  /* نجرّب كل البدائل ونشوف أحسن قراءة */
+  const alts = (trn.lastAlts && trn.lastAlts.length) ? trn.lastAlts : [heard];
+  let got = null;
+  for (const a of alts){
+    const r = PE.parseChunk(a, PE.newState());
+    for (const p of r.plates){ if (p.complete){ got = p; break; } }
+    if (got && got.letters.join('') === target) break;
+  }
+
+  const gotL = got ? got.letters.join('') : '';
+  const gotD = got ? got.digits : '';
+  const okL  = gotL === target;
+  const okD  = gotD === cur.D;
+
+  let learned = false;
+  if (!okL) learned = learnPhrase(heard, target);
+
+  let msg;
+  if (okL && okD)      msg = '✓ اتقرت صح تمامًا';
+  else if (learned)    msg = 'سمعها «' + (gotL || '—') + '» — اتعلمت نطقك. اضغط إعادة وكرّرها';
+  else                 msg = 'سمعها «' + (gotL || '—') + ' ' + (gotD || '—') + '» — اضغط إعادة وكرّرها';
+
+  trn.tries++;
+  trn.results[trn.i] = { target, D: cur.D, gotL, gotD, okL, okD, heard, learned, msg, tries: trn.tries };
+
+  st.textContent = msg;
+  st.className = 'trn-status ' + (okL && okD ? 'ok' : 'warn');
+  $('trnGo').textContent = 'انطق تاني';
+  trainActions();
+  buzz(okL && okD ? 40 : [60,60,60]);
+
+  /* صح -> نكمّل لوحدنا. غلط -> نستنى المستخدم يعيد */
+  if (okL && okD) setTimeout(()=>{ if (!trn) return; trn.i++; trn.tries = 0; trainRender(); }, 1000);
+}
+
+function trainDone(){
+  const res = (trn ? trn.results : []).filter(Boolean);
+  const n = res.length;
+  const okAll = res.filter(r=>r.okL && r.okD).length;
+  const learned = res.filter(r=>r.learned).length;
+  const pct = n ? Math.round(okAll/n*100) : 0;
+  const dictN = Object.keys(S.cfg.learn || {}).length;
+  trn = null;
+
+  showSheet(`
+    <h3>خلصنا التدريب</h3>
+    <p class="sh-sub">النتيجة والقاموس اللي اتبنى</p>
+    <div class="stat">
+      <div><b>${pct}%</b><span>اتقرت صح</span></div>
+      <div><b>${learned}</b><span>نطق جديد اتعلمه</span></div>
+      <div><b>${dictN}</b><span>إجمالي القاموس</span></div>
+    </div>
+    <div class="kbd-help">
+      ${pct >= 85 ? 'نطقك واضح جدًا — البرنامج جاهز يشتغل معاك.' :
+        pct >= 60 ? 'كويس. كرّر التدريب مرة كمان وهتلاقي الدقة زادت.' :
+        'الدقة لسه قليلة. جرّب تقرّب المايك شبر من بقك، وانطق أسماء الحروف كاملة (راء / باء / كاف)، وكرّر التدريب.'}
+    </div>
+    ${n ? `<div class="wlist" style="max-height:34dvh">
+      ${res.map(r=>`<div class="wl-item">
+        <span class="p">${r.target.split('').join(' ')} ${r.D}</span>
+        <span class="n">${r.okL && r.okD ? ('✓ صح' + (r.tries>1 ? ' بعد '+r.tries+' محاولات' : '')) : 'سمعها: ' + (r.gotL||'—') + ' ' + (r.gotD||'—')}</span>
+        <span style="flex:0 0 auto;color:${r.okL&&r.okD?'var(--ok)':'var(--gold)'};font-weight:900">${r.okL&&r.okD?'✓':'!'}</span>
+      </div>`).join('')}
+    </div>` : ''}
+    <button class="btn-main" id="trnAgain" style="margin-top:12px">تدريب تاني</button>
+    <button class="close" data-close style="width:100%">إغلاق</button>
+  `);
+  $('trnAgain').addEventListener('click', openTrain);
+  const c = $('ovRoot').querySelector('[data-close]');
+  if (c) c.addEventListener('click', closeOv);
+}
+
+/* ================================================================
+   النسخ الاحتياطي — تلقائي + يدوي
+   ================================================================ */
+const BAK_DAY = 24*3600*1000;
+let snapTimer = null;
+
+/* لقطة داخلية سريعة: أهم حاجة = قائمة المطلوب + قاموس النطق */
+function snapshotNow(){
+  try{
+    const snap = {
+      t: Date.now(),
+      wanted: S.wanted,
+      learn: S.cfg.learn || {},
+      counts: { log: S.log.length, match: S.match.length }
+    };
+    Store.get(K.SNAP, []).then(list=>{
+      list = Array.isArray(list) ? list : [];
+      /* ما نكررش لقطة لو مفيش تغيير خلال ساعة */
+      const last = list[list.length-1];
+      if (last && Date.now() - last.t < 3600*1000 &&
+          last.wanted.length === snap.wanted.length &&
+          Object.keys(last.learn).length === Object.keys(snap.learn).length) return;
+      list.push(snap);
+      while (list.length > 3) list.shift();
+      Store.set(K.SNAP, list);
+    }).catch(()=>{});
+  }catch(e){}
+}
+function scheduleSnapshot(){
+  clearTimeout(snapTimer);
+  snapTimer = setTimeout(snapshotNow, 4000);
+}
+
+/* ملف النسخة الكاملة */
+function backupObject(){
+  /* بيانات الدخول ما بتتحطش في الملف */
+  const cfg = Object.assign({}, S.cfg);
+  delete cfg.user; delete cfg.pass;
+  return {
+    app: 'arabi-plates',
+    version: APP_VERSION,
+    date: new Date().toISOString(),
+    cfg: cfg,
+    wanted: S.wanted,
+    log: S.log,
+    match: S.match
+  };
+}
+function backupFileName(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  return `نسخة-عرابي-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.json`;
+}
+async function doBackup(silent){
+  try{
+    download(backupFileName(), JSON.stringify(backupObject()), 'application/json');
+    S.cfg.lastBackup = Date.now();
+    await Store.set(K.CFG, S.cfg);
+    if (!silent) toast('اتنزّلت النسخة الاحتياطية', 'ok');
+    return true;
+  }catch(e){
+    if (!silent) toast('تعذّر إنشاء النسخة', 'err');
+    return false;
+  }
+}
+
+/* النسخة التلقائية: بتتنزّل مرة كل يوم عند أول دخول */
+function autoBackupCheck(){
+  if (S.cfg.autoBackup === false) return;
+  if (!S.wanted.length && !S.log.length) return;
+  const last = S.cfg.lastBackup || 0;
+  if (Date.now() - last < BAK_DAY) return;
+  /* لازم تكون جاية من ضغطة المستخدم عشان المتصفح ما يمنعش التنزيل */
+  doBackup(true).then(ok=>{ if (ok) toast('اتحفظت نسخة احتياطية تلقائية', 'ok'); });
+}
+
+/* استعادة */
+function pickBackup(){ $('bakIn').value = ''; $('bakIn').click(); }
+
+async function onBackupFile(e){
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  let data;
+  try{ data = JSON.parse(await f.text()); }
+  catch(err){
+    showModal(`<div class="mtag">${IC_BAD} ملف غير صالح</div>
+      <div class="mline">الملف ده مش نسخة احتياطية من البرنامج.</div>
+      <button class="close" data-close>تمام</button>`,'alarm');
+    return;
+  }
+  if (!data || data.app !== 'arabi-plates'){
+    showModal(`<div class="mtag">${IC_BAD} ملف غير صالح</div>
+      <div class="mline">الملف ده مش نسخة احتياطية من عرابي.</div>
+      <button class="close" data-close>تمام</button>`,'alarm');
+    return;
+  }
+
+  const w = (data.wanted||[]).length, lg = (data.log||[]).length,
+        mt = (data.match||[]).length, ln = Object.keys((data.cfg&&data.cfg.learn)||{}).length;
+  const when = data.date ? new Date(data.date) : null;
+
+  showModal(`
+    <div class="dt-ic" style="color:var(--blue)">${IC_PIN}</div>
+    <div class="dt-title">استعادة نسخة</div>
+    <div class="dt-row"><span class="lb">تاريخ النسخة</span><span class="vl ar">${when ? esc(fmtDate(when.getTime())) : '—'}</span></div>
+    <div class="dt-row"><span class="lb">لوحات مطلوبة</span><span class="vl">${w}</span></div>
+    <div class="dt-row"><span class="lb">سجل الفحص</span><span class="vl">${lg}</span></div>
+    <div class="dt-row"><span class="lb">مطابقات</span><span class="vl">${mt}</span></div>
+    <div class="dt-row"><span class="lb">قاموس النطق</span><span class="vl">${ln}</span></div>
+    <div class="dt-actions">
+      <button class="dt-yes" id="bkAll">استبدال كل حاجة</button>
+      <button class="dt-no"  id="bkMerge">دمج مع الموجود</button>
+    </div>
+    <button class="close" data-close>إلغاء</button>`, 'detect');
+
+  const apply = async (replace)=>{
+    const keepUser = { user:S.cfg.user, pass:S.cfg.pass };
+    if (replace){
+      S.wanted = data.wanted || [];
+      S.log    = data.log || [];
+      S.match  = data.match || [];
+      S.cfg    = Object.assign({}, S.cfg, data.cfg || {}, keepUser);
+    } else {
+      const seen = new Set(S.wanted.map(x=>x.key));
+      for (const x of (data.wanted||[])) if (!seen.has(x.key)){ S.wanted.push(x); seen.add(x.key); }
+      const ids = new Set(S.log.map(x=>x.id));
+      for (const x of (data.log||[]))   if (!ids.has(x.id)) S.log.push(x);
+      const mids = new Set(S.match.map(x=>x.id));
+      for (const x of (data.match||[])) if (!mids.has(x.id)) S.match.push(x);
+      S.log.sort((a,b)=>a.t-b.t);
+      S.cfg.learn = Object.assign({}, (data.cfg&&data.cfg.learn)||{}, S.cfg.learn||{});
+    }
+    rebuildWanted();
+    await Store.set(K.WANTED, S.wanted);
+    await Store.set(K.LOG, S.log);
+    await Store.set(K.MATCH, S.match);
+    await Store.set(K.CFG, S.cfg);
+    closeOv();
+    applyTheme(); applyLogo(); applyNumMode(); gpsChip();
+    S.view = 'wanted'; render();
+    toast(replace ? 'اتستعادت النسخة بالكامل' : 'اتدمجت النسخة مع الموجود', 'ok');
+  };
+  $('bkAll').addEventListener('click', ()=>apply(true));
+  $('bkMerge').addEventListener('click', ()=>apply(false));
+}
+
+/* شاشة النسخ الاحتياطي */
+function openBackup(){
+  const last = S.cfg.lastBackup ? fmtDate(S.cfg.lastBackup) : 'لسه مفيش';
+  const auto = S.cfg.autoBackup !== false;
+  Store.get(K.SNAP, []).then(list=>{
+    list = Array.isArray(list) ? list : [];
+    showSheet(`
+      <h3>النسخ الاحتياطي</h3>
+      <p class="sh-sub">آخر نسخة اتنزّلت: ${esc(last)}</p>
+      <div class="stat">
+        <div><b>${S.wanted.length}</b><span>لوحة مطلوبة</span></div>
+        <div><b>${S.log.length}</b><span>سجل فحص</span></div>
+        <div><b>${Object.keys(S.cfg.learn||{}).length}</b><span>نطق محفوظ</span></div>
+      </div>
+
+      <button class="opt green" id="bkNow">
+        <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg></span>
+        <span class="ot"><b>تنزيل نسخة دلوقتي</b><span>ملف واحد فيه كل حاجة — احفظه في مكان آمن</span></span>
+      </button>
+
+      <button class="opt" id="bkRestore">
+        <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9M7 13l5-5 5 5M4 4h16"/></svg></span>
+        <span class="ot"><b>استعادة من ملف</b><span>ترجّع القائمة والسجلات وقاموس النطق</span></span>
+      </button>
+
+      <button class="opt ${auto?'gold':''}" id="bkAuto">
+        <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/></svg></span>
+        <span class="ot"><b>النسخة التلقائية</b><span>${auto?'مفعّلة — نسخة كل يوم أول ما تدخل':'مقفولة'}</span></span>
+      </button>
+
+      ${list.length ? `
+        <h3 style="margin-top:18px">لقطات محفوظة داخل الجهاز</h3>
+        <p class="sh-sub">بتتحفظ لوحدها — للطوارئ لو مسحت القائمة بالغلط</p>
+        <div class="wlist">
+          ${list.slice().reverse().map((sn,i)=>`
+            <div class="wl-item">
+              <span class="p" style="font-size:13px;letter-spacing:0">${esc(fmtDate(sn.t))}</span>
+              <span class="n">${sn.wanted.length} لوحة — ${Object.keys(sn.learn||{}).length} نطق</span>
+              <button class="x" style="color:var(--blue)" data-i="${list.length-1-i}">استرجاع</button>
+            </div>`).join('')}
+        </div>` : ''}
+
+      <div class="kbd-help" style="margin-top:14px">
+        <b>مهم:</b> كل بياناتك محفوظة في متصفح الموبايل بس. لو مسحت بيانات كروم أو غيّرت موبايل، كله بيضيع —
+        <b>ما عدا</b> لو عندك ملف النسخة. احفظه على درايف أو ابعته لنفسك واتساب.
+      </div>
+    `);
+
+    $('bkNow').addEventListener('click', ()=>doBackup(false));
+    $('bkRestore').addEventListener('click', pickBackup);
+    $('bkAuto').addEventListener('click', async ()=>{
+      S.cfg.autoBackup = (S.cfg.autoBackup === false);
+      await Store.set(K.CFG, S.cfg);
+      openBackup();
+    });
+    $('ovRoot').querySelectorAll('.wl-item button[data-i]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const sn = list[+btn.dataset.i];
+        if (!sn) return;
+        S.wanted = sn.wanted || [];
+        S.cfg.learn = Object.assign({}, sn.learn || {}, S.cfg.learn || {});
+        rebuildWanted();
+        await Store.set(K.WANTED, S.wanted);
+        await Store.set(K.CFG, S.cfg);
+        closeOv(); S.view = 'wanted'; render();
+        toast('اترجّعت اللقطة', 'ok');
+      });
+    });
+  });
+}
+
+/* ================================================================
+   التشغيل والأحداث
+   ================================================================ */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', S.cfg.dark ? 'dark' : 'light');
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', S.cfg.dark ? '#0a1424' : '#0b5cab');
+  const mo = document.getElementById('icMoon'), su = document.getElementById('icSun');
+  if (mo && su){ mo.classList.toggle('hide', !!S.cfg.dark); su.classList.toggle('hide', !S.cfg.dark); }
+}
+
+function applyNumMode(){
+  const b = $('btnNum'); if (b) b.classList.toggle('num-on', !!S.cfg.numMode);
+  const h = $('scanHint');
+  if (h) h.innerHTML = S.cfg.numMode
+    ? 'انطق <b>الأرقام الأربعة بس</b>: «اتنين تلاتة أربعة خمسة»<br>لو الأرقام مش في قائمة المطلوب = سليمة على طول<br>ولو موجودة، هيسألك على الحروف عشان تتأكد'
+    : 'مثال: «راء باء كاف اتنين تلاتة أربعة خمسة» ← ر ب ك 2345<br>انطق اللوحة كلها في نَفَس واحد — <b>3 حروف و4 أرقام</b> — وكمّل لوحات ورا بعض<br><b>لو طلعت غلط:</b> دوس على السطر وصححه — البرنامج بيتعلم نطقك';
+}
+
+function showApp(){
+  $('login').classList.add('hide');
+  $('app').classList.remove('hide');
+  render();
+}
+
+async function doLogin(){
+  const u = $('lgU').value.trim(), p = $('lgP').value;
+  if (u === S.cfg.user && p === S.cfg.pass){
+    $('lgErr').textContent = '';
+    sessionStorageSafe('arb_in','1');
+    showApp();
+    autoBackupCheck();      /* جاية من ضغطة المستخدم فالمتصفح بيسمح بالتنزيل */
+  } else {
+    $('lgErr').textContent = 'اسم المستخدم أو كلمة المرور غلط';
+    buzz(120);
+  }
+}
+function sessionStorageSafe(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} }
+function sessionGetSafe(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }
+
+async function init(){
+  S.cfg    = Object.assign(S.cfg, await Store.get(K.CFG, {}));
+  S.wanted = await Store.get(K.WANTED, []) || [];
+  S.log    = await Store.get(K.LOG, []) || [];
+  S.match  = await Store.get(K.MATCH, []) || [];
+  /* ترقية: لو لسه على بيانات الدخول القديمة، حوّلها للاسم الجديد */
+  if (S.cfg.user === 'elaraby' && S.cfg.pass === 'elaraby'){
+    S.cfg.user = 'orabi'; S.cfg.pass = 'orabi';
+    await Store.set(K.CFG, S.cfg);
+  }
+  rebuildWanted();
+  applyTheme();
+  applyLogo();
+  const vt = document.getElementById('verTag');
+  if (vt) vt.textContent = 'النسخة ' + APP_VERSION;
+  $('btnFast').classList.toggle('on', !!S.cfg.fast);
+  gpsChip();
+  applyNumMode();
+
+  /* الدخول */
+  $('lgGo').addEventListener('click', doLogin);
+  $('lgP').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  $('lgU').addEventListener('keydown', e=>{ if(e.key==='Enter') $('lgP').focus(); });
+  if (sessionGetSafe('arb_in') === '1') showApp();
+
+  /* الهيدر */
+  $('btnTheme').addEventListener('click', async ()=>{
+    S.cfg.dark = !S.cfg.dark; applyTheme(); await Store.set(K.CFG, S.cfg);
+  });
+  $('btnTrain').addEventListener('click', openTrain);
+  $('btnOut').addEventListener('click', ()=>{
+    if (S.listening) stopSession();
+    sessionStorageSafe('arb_in','0');
+    $('app').classList.add('hide'); $('login').classList.remove('hide');
+    $('lgP').value = '';
+  });
+
+  /* التنقّل */
+  document.querySelectorAll('.nb').forEach(b=>{
+    b.addEventListener('click', ()=>{ S.view = b.dataset.v; render(); });
+  });
+
+  /* الفحص */
+  $('btnMic').addEventListener('click', toggleSession);
+  $('btnMic2').addEventListener('click', toggleSession);
+  $('btnFast').addEventListener('click', async ()=>{
+    S.cfg.fast = !S.cfg.fast;
+    $('btnFast').classList.toggle('on', S.cfg.fast);
+    await Store.set(K.CFG, S.cfg);
+    toast(S.cfg.fast ? 'الوضع السريع: اللوحة تتسجّل أسرع' : 'الوضع العادي: دقة أعلى', 'ok');
+  });
+  $('btnManual').addEventListener('click', openManual);
+  $('btnNum').addEventListener('click', async ()=>{
+    S.cfg.numMode = !S.cfg.numMode;
+    await Store.set(K.CFG, S.cfg);
+    applyNumMode();
+    toast(S.cfg.numMode ? 'وضع الأرقام: انطق الأرقام الأربعة بس' : 'الوضع العادي: 3 حروف و4 أرقام', 'ok');
+  });
+  $('btnGps').addEventListener('click', async ()=>{
+    S.cfg.gps = !S.cfg.gps;
+    await Store.set(K.CFG, S.cfg);
+    if (S.cfg.gps){ if (S.listening) startGps(); else { S.gps.state='off'; gpsChip(); } toast('تسجيل الموقع مفعّل','ok'); }
+    else { stopGps(); S.gps = { lat:null,lng:null,acc:null,ts:0,state:'off',err:'' }; gpsChip(); toast('تسجيل الموقع مقفول','ok'); }
+  });
+
+  /* المطلوب والسجل */
+  $('btnFile').addEventListener('click', openFileSheet);
+  $('btnDlMatch').addEventListener('click', exportMatches);
+  $('btnDlAll').addEventListener('click', exportAll);
+  $('fileIn').addEventListener('change', onFile);
+
+  /* الخريطة */
+  document.querySelectorAll('.map-tools .mchip[data-f]').forEach(b=>{
+    b.addEventListener('click', ()=>{ mapFilter = b.dataset.f; renderMap(); });
+  });
+  $('btnFollow').addEventListener('click', ()=>{ mapFollow = !mapFollow; renderMap(); });
+  $('btnMapDl').addEventListener('click', exportMapPoints);
+  setInterval(mapLiveTick, 5000);
+  $('imgIn').addEventListener('change', onLogoFile);
+  $('bakIn').addEventListener('change', onBackupFile);
+  $('logoIn').addEventListener('change', onLogo);
+  applyLogo();
+
+  /* لو الصفحة اتقفلت وهي بتسمع */
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.hidden && S.listening){ /* أندرويد بيوقف التعرّف تلقائيًا، الـ onend هيعيد التشغيل */ }
+  });
+  window.addEventListener('beforeunload', ()=>{ if (S.listening) { want = false; try{ rec && rec.stop(); }catch(e){} } });
+
+  /* منفذ اختبار: تقدر تجرّب النطق من الكونسول من غير مايك
+     مثال: simulateVoice('راء باء كاف اتنين تلاتة اربعة خمسة') */
+  window.simulateVoice = (txt)=>{ clearIdle(); handleFinal([String(txt||'')]); armIdle(); };
+  window.__arb = { S, addPlate, PE };
+
+  render();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+})();
+
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+</script>
+</body>
+</html>
